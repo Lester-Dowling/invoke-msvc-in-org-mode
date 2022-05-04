@@ -1,0 +1,26 @@
+* Example src code for Boost C++
+
+#+name: boost-first-example
+#+header: :exports  results
+#+header: :results  scalar
+#+header: :libs     -lboost_filesystem
+#+header: :includes <cstdlib> <iostream> <iomanip> <memory> <boost/version.hpp> <boost/filesystem.hpp>
+#+begin_src C++
+  using namespace std;
+  cout << "Boost version is " << BOOST_LIB_VERSION << endl;
+  namespace fs = boost::filesystem;
+  fs::path h{ std::getenv("USERPROFILE") };
+  fs::path p = h / "Documents";
+  cout << p << endl;
+  fs::path q = p / "doc.txt";
+  cout << q << endl;
+  cout << boolalpha << fs::exists(q) << endl;
+  cout << "Okay!" << endl;
+#+end_src
+
+#+RESULTS: boost-first-example
+: Boost version is 1_78
+: "C:\Users\ljdowling\Documents"
+: "C:\Users\ljdowling\Documents\doc.txt"
+: false
+: Okay!
