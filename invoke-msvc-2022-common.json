@@ -1,0 +1,65 @@
+{
+    "defines": [
+        "_CONSOLE",
+        "NDEBUG",
+        "_CRT_SECURE_NO_WARNINGS",
+        "_SCL_SECURE_NO_WARNINGS",
+        "_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS",
+        "_UNICODE",
+        "_WINSOCK_DEPRECATED_NO_WARNINGS",
+        "NOMINMAX",
+        "UNICODE",
+        "_UNICODE",
+        "VC_EXTRALEAN",
+        "WIN32_LEAN_AND_MEAN",
+        "WIN64",
+        "_WIN64",
+        "_WINDOWS",
+        "WINAPI_FAMILY=WINAPI_FAMILY_DESKTOP_APP"
+    ],
+    "compiler_options": [
+        "nologo",
+        "utf-8",
+        "EHsc",
+        "GR",
+        "O2",
+        "MD",
+        "TP",
+        "MP",
+        "std:c++20",
+        "Zc:wchar_t",
+        "Zc:rvalueCast",
+        "Zc:inline",
+        "Zc:strictStrings",
+        "Zc:throwingNew",
+        "permissive-",
+        "Zc:__cplusplus",
+        "Zc:externConstexpr",
+        "W4",
+        "w34100",
+        "w34189",
+        "w44996",
+        "w44456",
+        "w44457",
+        "w44458",
+        "wd4577",
+        "wd4467"
+    ],
+    "include_dirs": [
+        "F:/vcpkg/installed/x64-windows/include"
+    ],
+    "linker_options": [
+        "/nologo",
+        "/MACHINE:X64",
+        "/SUBSYSTEM:CONSOLE",
+        "/INCREMENTAL:NO",
+        "/DYNAMICBASE",
+        "/OPT:REF",
+        "/OPT:ICF",
+        "/NXCOMPAT"
+    ],
+    "libs": [
+        "kernel32.lib",
+        "user32.lib"
+    ]
+}
