@@ -6,15 +6,16 @@ Clone this repo to "your favourite bin directory".  Then, customize org-babel in
 
 ```bash
     >M-x customize-variable
-    >org-babel-C++-compiler
+     org-babel-C++-compiler
 ```
 
 Set the value to the Python call:
 
 ```bash
-    >python "your favourite bin directory"/invoke-msvc-in-org-mode/main.py
+    python "your favourite bin directory"/invoke-msvc-in-org-mode/main.py
 ```
 
 ## Example
 After installation, try the example org file.  Place the cursor in the middle of the C++
-source code and press Ctrl-C Ctrl-C.
+source code and press Ctrl-C Ctrl-C.  The results should be successfully placed under the
+source code.
