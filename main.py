@@ -144,6 +144,7 @@ def setup_env():
 
 
 if __name__ == '__main__':
+    # clang++ -std=gnu++2a -O3
     logging.basicConfig(level=logging.DEBUG,
                         filename='invoke-msvc-2022.log',
                         format='%(asctime)s\t%(levelname)s\t%(message)s')

@@ -1,3 +1,4 @@
+from pathlib import Path
 from abc import ABCMeta
 from abc import abstractmethod
 from overrides import EnforceOverrides
@@ -6,7 +7,7 @@ from overrides import EnforceOverrides
 class IPackage(EnforceOverrides, metaclass=ABCMeta):
     """
     Interface to a package of the compilation process.  The details of each package are
-    listed on the command line to the compiler. 
+    listed on the command line to the compiler.
     """
 
     @property
@@ -62,5 +63,13 @@ class IPackage(EnforceOverrides, metaclass=ABCMeta):
     def release_libs(self) -> list[str]:
         """
         A list of lib pathnames to pass to the linker for a release build.
+        """
+        raise NotImplementedError()
+
+    @property
+    @abstractmethod
+    def lib_dir(self) -> Path:
+        """
+        The lib directory for all the lib files of the package.
         """
         raise NotImplementedError()

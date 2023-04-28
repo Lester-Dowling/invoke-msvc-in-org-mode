@@ -106,3 +106,8 @@ class Boost(IPackage):
     @overrides
     def release_libs(self) -> list[str]:
         return self._release_libs
+
+    @property
+    @overrides
+    def lib_dir(self) -> Path:
+        return Path(self._boost_lib_dir)
