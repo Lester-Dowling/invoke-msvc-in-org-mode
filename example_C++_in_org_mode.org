@@ -17,10 +17,3 @@ cout << q << endl;
 cout << boolalpha << fs::exists(q) << endl;
 cout << "Okay!" << endl;
 #+end_src
-
-#+RESULTS: boost-first-example
-: Boost version is 1_82
-: "C:\Users\ljdowling\Documents"
-: "C:\Users\ljdowling\Documents\doc.txt"
-: false
-: Okay!

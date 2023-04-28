@@ -81,3 +81,7 @@ class Common(IPackage):
     @overrides
     def lib_dir(self) -> Path:
         return None
+
+    @overrides
+    def duplicate_required_dlls(self, target : str) -> list[str]:
+        return []

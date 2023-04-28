@@ -1,10 +1,12 @@
 import os
 import re
 import json
+import shutil
+import logging
 from overrides import overrides
 from pathlib import Path
 from IPackage import IPackage
-
+import DLLs
 
 class Boost(IPackage):
     """
@@ -111,3 +113,21 @@ class Boost(IPackage):
     @overrides
     def lib_dir(self) -> Path:
         return Path(self._boost_lib_dir)
+
+
+    @overrides
+    def duplicate_required_dlls(self, target : str) -> list[str]:
+        """
+        Copy DLLs from their library location to beside the target executable.
+        """
+        dlls_to_be_copied = DLLs.required_by_target(target)
+        uncopied_dlls = []
+        for dll in dlls_to_be_copied:
+            DEST_PATH = Path(target).parent # Copy DLL beside target executable.
+            SRC_PATH = self.lib_dir / dll
+            if SRC_PATH.exists():
+                shutil.copy2(SRC_PATH, DEST_PATH)
+                logging.debug("Copied required DLL: {}".format(str(SRC_PATH)))
+            else:
+                uncopied_dlls.append(dll)
+        return(uncopied_dlls)

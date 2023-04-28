@@ -73,3 +73,10 @@ class IPackage(EnforceOverrides, metaclass=ABCMeta):
         The lib directory for all the lib files of the package.
         """
         raise NotImplementedError()
+
+    @abstractmethod
+    def duplicate_required_dlls(self, target : str) -> list[str]:
+        """
+        Copy DLLs from their library location to beside the target executable.
+        """
+        raise NotImplementedError()
