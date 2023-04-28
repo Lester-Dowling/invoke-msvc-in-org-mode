@@ -45,9 +45,7 @@
         "wd4577",
         "wd4467"
     ],
-    "include_dirs": [
-        "F:/vcpkg/installed/x64-windows/include"
-    ],
+    "include_dirs": [],
     "linker_options": [
         "/nologo",
         "/MACHINE:X64",
