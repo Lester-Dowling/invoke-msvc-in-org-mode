@@ -16,16 +16,32 @@ class Vcpkg(IPackage):
 
     def __init__(self, argv) -> None:
         # Vcpkg root dir:
-        self._vcpkg_root = Path(os.environ['VCPKG_ROOT'])
-        if not self._vcpkg_root.exists():
-            raise Exception(f"No Vcpkg root: {self._vcpkg_root}")
+        self._root = Path(os.environ['VCPKG_ROOT'])
+        if not self._root.exists():
+            raise Exception(f"No vcpkg root: {self._root}")
+
+        # Vcpkg installed dir:
+        self._installed_dir = self._root / "installed" / "x64-windows"
+        if not self._installed_dir.exists():
+            raise Exception(f"No vcpkg installed dir: {self._installed_dir}")
+
+        # Vcpkg include dir:
+        self._include_dir = self._installed_dir / "include"
+        if not self._include_dir.exists():
+            raise Exception(f"No vcpkg include dir: {self._include_dir}")
 
         # Vcpkg lib dir:
-        self._vcpkg_lib_dir = self._vcpkg_root / ".." / ".." / "lib"
-        if not self._vcpkg_lib_dir.exists():
-            raise Exception(f"No Vcpkg lib dir: {self._vcpkg_lib_dir}")
+        self._lib_dir = self._installed_dir / "lib"
+        if not self._lib_dir.exists():
+            raise Exception(f"No vcpkg lib dir: {self._lib_dir}")
 
-        # Vcpkg lib filename regexes:
+        # Vcpkg dll dir:
+        self._dll_dir = self._installed_dir / "bin"
+        if not self._dll_dir.exists():
+            raise Exception(f"No vcpkg dll dir: {self._dll_dir}")
+
+        # Vcpkg lib filenames:
+        self._lib_filenames = list(self._lib_dir.glob('*.lib'))
         self._arg_regex_str = "-lvcpkg_(.+)"
         self._lib_debug_version_regex_str = ".+-gd-.+"
 
@@ -37,14 +53,11 @@ class Vcpkg(IPackage):
 
         # Compiler options read from json file:
         script_filename = Path(os.path.realpath(__file__))
-        user_options_filename = script_filename.with_name( 'invoke-msvc-2022-vcpkg.json')
-        with open(user_options_filename) as f:
-            user_clo = json.load(f)
-        self._defines = user_clo['defines']
-
-        # Vcpkg include dir:
-        # "F:/vcpkg/installed/x64-windows/include"
-        self._include_dirs = [self._vcpkg_root]
+        user_options_filename = script_filename.with_name( 'vcpkg.json')
+        if user_options_filename.exists():
+            with open(user_options_filename) as f:
+                user_clo = json.load(f)
+            self._defines = user_clo['defines']
 
         # Find the requested Vcpkg libs in argv:
         arg_libs = list()  # List of Vcpkg libs found in argv.
@@ -67,7 +80,7 @@ class Vcpkg(IPackage):
         re_debug_version_lib = re.compile(self._lib_debug_version_regex_str)
         self._debug_libs = list()  # List of Paths to Vcpkg debug lib files.
         self._release_libs = list()
-        for f in sorted(self._vcpkg_lib_dir.glob('*.lib')):
+        for f in sorted(self._lib_dir.glob('*.lib')):
             fstr = str(f)
             for re_lib_filename in re_lib_filenames:
                 if re_lib_filename.match(fstr):
@@ -99,7 +112,7 @@ class Vcpkg(IPackage):
     @property
     @overrides
     def include_dirs(self) -> list[str]:
-        return self._include_dirs
+        return [self._include_dir]
 
     @property
     @overrides
@@ -114,7 +127,7 @@ class Vcpkg(IPackage):
     @property
     @overrides
     def lib_dir(self) -> Path:
-        return Path(self._vcpkg_lib_dir)
+        return Path(self._lib_dir)
 
 
     @overrides

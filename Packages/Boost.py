@@ -16,12 +16,17 @@ class Boost(IPackage):
 
     def __init__(self, argv) -> None:
         # Boost root dir:
-        self._boost_root = Path(os.environ['BOOST_ROOT'])
-        if not self._boost_root.exists():
-            raise Exception(f"No Boost root: {self._boost_root}")
+        self._root = Path(os.environ['BOOST_ROOT'])
+        if not self._root.exists():
+            raise Exception(f"No Boost root: {self._root}")
+
+        # Vcpkg include dir:
+        self._include_dir = self._root
+        if not self._include_dir.exists():
+            raise Exception(f"No Boost include dir: {self._include_dir}")
 
         # Boost lib dir:
-        self._boost_lib_dir = self._boost_root / ".." / ".." / "lib"
+        self._boost_lib_dir = self._root / ".." / ".." / "lib"
         if not self._boost_lib_dir.exists():
             raise Exception(f"No Boost lib dir: {self._boost_lib_dir}")
 
@@ -38,10 +43,10 @@ class Boost(IPackage):
         # Compiler options read from json file:
         script_filename = Path(os.path.realpath(__file__))
         user_options_filename = script_filename.with_name('boost.json')
-        with open(user_options_filename) as f:
-            user_clo = json.load(f)
-        self._defines = user_clo['defines']
-        self._include_dirs = [self._boost_root]
+        if user_options_filename.exists():
+            with open(user_options_filename) as f:
+                user_clo = json.load(f)
+                self._defines = user_clo['defines']
 
         # Find the requested Boost libs in argv:
         arg_libs = list()  # List of Boost libs found in argv.
@@ -96,7 +101,7 @@ class Boost(IPackage):
     @property
     @overrides
     def include_dirs(self) -> list[str]:
-        return self._include_dirs
+        return [self._include_dir]
 
     @property
     @overrides
