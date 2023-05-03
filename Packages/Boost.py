@@ -37,8 +37,7 @@ class Boost(IPackage):
 
         # Compiler options read from json file:
         script_filename = Path(os.path.realpath(__file__))
-        user_options_filename = script_filename.with_name(
-            'invoke-msvc-2022-boost.json')
+        user_options_filename = script_filename.with_name('boost.json')
         with open(user_options_filename) as f:
             user_clo = json.load(f)
         self._defines = user_clo['defines']

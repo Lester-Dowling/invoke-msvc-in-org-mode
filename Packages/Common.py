@@ -30,8 +30,7 @@ class Common(IPackage):
 
         # Compiler options read from json file:
         script_filename = Path(os.path.realpath(__file__))
-        user_options_filename = script_filename.with_name(
-            'invoke-msvc-2022-common.json')
+        user_options_filename = script_filename.with_name('common.json')
         with open(user_options_filename) as user_options_file:
             user_options = json.load(user_options_file)
         self._defines = user_options['defines']
