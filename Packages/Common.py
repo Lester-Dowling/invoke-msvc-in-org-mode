@@ -2,7 +2,7 @@ import os
 import json
 from overrides import overrides
 from pathlib import Path
-from IPackage import IPackage
+from Packages.IPackage import IPackage
 
 
 class Common(IPackage):

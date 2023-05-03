@@ -31,8 +31,7 @@ def create_env(env_path):
                 fenv.write(f"VS_YEAR={os.environ['VS_YEAR']}\n")
                 INSTALLATION_PATH = Path(ii.find('installationPath').text)
                 if not INSTALLATION_PATH.exists():
-                    raise Exception(
-                        "No such installation path: " + str(INSTALLATION_PATH))
+                    raise Exception("No such installation path: " + str(INSTALLATION_PATH))
                 os.environ['VS_INSTALLATION_PATH'] = str(INSTALLATION_PATH)
                 fenv.write(
                     f"VS_INSTALLATION_PATH={os.environ['VS_INSTALLATION_PATH']}\n")
@@ -64,8 +63,7 @@ def create_env(env_path):
                 if not VS_MAKE_PROGRAM.exists():
                     raise Exception("No Ninja installation.")
                 os.environ['VS_MAKE_PROGRAM'] = str(VS_MAKE_PROGRAM)
-                fenv.write(
-                    f"VS_MAKE_PROGRAM={os.environ['VS_MAKE_PROGRAM']}\n")
+                fenv.write(f"VS_MAKE_PROGRAM={os.environ['VS_MAKE_PROGRAM']}\n")
                 os.environ['VS_NINJA'] = str(VS_MAKE_PROGRAM)
                 fenv.write(f"VS_NINJA={os.environ['VS_NINJA']}\n")
                 TOOLS_MSVC = VS_VC / "Tools" / "MSVC"
@@ -75,8 +73,7 @@ def create_env(env_path):
                 fenv.write(f"VS_TOOLS_MSVC={os.environ['VS_TOOLS_MSVC']}\n")
                 VS_TOOLS_VERSIONED = sorted(TOOLS_MSVC.glob('*'))[-1]
                 os.environ['VS_TOOLS_VERSIONED'] = str(VS_TOOLS_VERSIONED)
-                fenv.write(
-                    f"VS_TOOLS_VERSIONED={os.environ['VS_TOOLS_VERSIONED']}\n")
+                fenv.write(f"VS_TOOLS_VERSIONED={os.environ['VS_TOOLS_VERSIONED']}\n")
                 VS_C_COMPILER = VS_TOOLS_VERSIONED / "bin" / "HostX64" / "x64" / "cl.exe"
                 if not VS_C_COMPILER.exists():
                     raise Exception("No C compiler installation.")
@@ -86,8 +83,7 @@ def create_env(env_path):
                 if not VS_CXX_COMPILER.exists():
                     raise Exception("No C++ compiler installation.")
                 os.environ['VS_CXX_COMPILER'] = str(VS_CXX_COMPILER)
-                fenv.write(
-                    f"VS_CXX_COMPILER={os.environ['VS_CXX_COMPILER']}\n")
+                fenv.write(f"VS_CXX_COMPILER={os.environ['VS_CXX_COMPILER']}\n")
                 p = subprocess.run([
                     "cmd.exe",
                     "/c",
@@ -144,7 +140,6 @@ def setup_env():
 
 
 if __name__ == '__main__':
-    # clang++ -std=gnu++2a -O3
     logging.basicConfig(level=logging.DEBUG,
                         filename='invoke-msvc-2022.log',
                         format='%(asctime)s\t%(levelname)s\t%(message)s')

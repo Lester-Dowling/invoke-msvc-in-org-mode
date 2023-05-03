@@ -5,8 +5,8 @@ import shutil
 import logging
 from overrides import overrides
 from pathlib import Path
-from IPackage import IPackage
-import DLLs
+from Packages.IPackage import IPackage
+import Packages.DLLs
 
 class Boost(IPackage):
     """
@@ -119,7 +119,7 @@ class Boost(IPackage):
         """
         Copy DLLs from their library location to beside the target executable.
         """
-        dlls_to_be_copied = DLLs.required_by_target(target)
+        dlls_to_be_copied = Packages.DLLs.required_by_target(target)
         uncopied_dlls = []
         for dll in dlls_to_be_copied:
             DEST_PATH = Path(target).parent # Copy DLL beside target executable.

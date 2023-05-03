@@ -1,0 +1,62 @@
+* Verify Boost version
+
+* Example src code for Boost C++
+
+#+name: check-boost-version
+#+header: :exports  results
+#+header: :includes <iostream> <boost/version.hpp>
+#+begin_src C++
+using namespace std;
+cout << "Boost version is " << BOOST_LIB_VERSION << endl;
+#+end_src
+
+#+RESULTS: check-boost-version
+: Boost version is 1_82
+
+* Determine if Documents folder exists
+
+#+name: verify-documents-folder-exists
+#+header: :exports  results
+#+header: :results  scalar
+#+header: :libs     -lboost_filesystem
+#+header: :includes <cstdlib> <locale> <iostream> <iomanip> <boost/filesystem.hpp>
+#+begin_src C++
+using namespace std;
+namespace fs = boost::filesystem;
+const fs::path h{ std::getenv("USERPROFILE") };
+const fs::path p = h / "Documents";
+struct tf_dir_exists : std::numpunct<char> {
+  std::string do_truename()  const { return "The directory exists!"; }
+  std::string do_falsename() const { return "Ain't no such directory!"; }
+};
+std::cout.imbue(std::locale(std::cout.getloc(), new tf_dir_exists));
+cout << "Does " << p << " exist? ";
+cout << boolalpha << fs::exists(p) << endl;
+#+end_src
+
+#+RESULTS: verify-documents-folder-exists
+: Does "C:\Users\ljdowling\Documents" exist? The directory exists!
+
+* Determine if doc.txt file exists
+
+#+name: verify-doc-txt-file-exists
+#+header: :exports  results
+#+header: :results  scalar
+#+header: :libs     -lboost_filesystem
+#+header: :includes <cstdlib> <locale> <iostream> <iomanip> <memory> <boost/filesystem.hpp>
+#+begin_src C++
+using namespace std;
+namespace fs = boost::filesystem;
+fs::path h{ std::getenv("USERPROFILE") };
+fs::path q = h / "Documents" / "doc.txt";
+struct tf_file_exists : std::numpunct<char> {
+  std::string do_truename()  const { return "The file exists!"; }
+  std::string do_falsename() const { return "Ain't no such file in existence!!!"; }
+};
+std::cout.imbue(std::locale(std::cout.getloc(), new tf_file_exists));
+cout << "Does " << q << " exist? ";
+cout << boolalpha << fs::exists(q) << endl;
+#+end_src
+
+#+RESULTS: verify-doc-txt-file-exists
+: Does "C:\Users\ljdowling\Documents\doc.txt" exist? Ain't no such file in existence!!!

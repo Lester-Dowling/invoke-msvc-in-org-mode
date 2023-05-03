@@ -5,8 +5,8 @@ import shutil
 import logging
 from overrides import overrides
 from pathlib import Path
-from IPackage import IPackage
-import DLLs
+from Packages.IPackage import IPackage
+import Packages.DLLs
 
 class Vcpkg(IPackage):
     """

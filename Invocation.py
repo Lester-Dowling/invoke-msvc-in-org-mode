@@ -2,13 +2,16 @@ import sys
 import subprocess
 import logging
 import re
-import shutil
 from pathlib import Path
-from Boost import Boost
-from Common import Common
+from Packages.Boost import Boost
+from Packages.Common import Common
 
 
 def bounded_incr(idx, bound):
+    """
+    Increment idx but not beyond bound.  Throw exception if out of bounds.
+    """
+
     if idx < bound - 1:
         return idx + 1
     else:
@@ -16,6 +19,11 @@ def bounded_incr(idx, bound):
 
 
 class Invocation:
+    """
+    Invoke the MSVC C++ compiler.  Might be possible to write another class for clang:
+    Eg: clang++ -std=gnu++2a -O3
+    """
+
     def __init__(self, argv) -> None:
         self._compiler = "cl.exe"
         self._target = ""
@@ -131,8 +139,6 @@ class Invocation:
         logging.debug("cl_clo == {}".format(cl_clo))
         # Invoking the compiler with just subprocess.run seems to work well:
         cp = subprocess.run(cl_clo, capture_output=True, text=True)
-        # c = subprocess.Popen(cl_clo, stdout=sys.stderr, stderr=sys.stderr)
-        # c.communicate()
         if OBJ.exists():
             OBJ.unlink()
         if cp.returncode != 0:
