@@ -9,7 +9,6 @@ def bounded_incr(idx, bound):
     """
     Increment idx but not beyond bound.  Throw exception if out of bounds.
     """
-
     if idx < bound - 1:
         return idx + 1
     else:

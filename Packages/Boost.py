@@ -104,7 +104,7 @@ class Boost(IPackage):
     @property
     @overrides
     def include_dirs(self) -> list[str]:
-        return [self._include_dir]
+        return [str(self._include_dir)]
 
     @property
     @overrides
@@ -140,7 +140,7 @@ class Boost(IPackage):
                 located_dlls.add(dll)
             else:
                 self._uncopied_dlls.add(dll)
-        return(located_dlls)
+        return located_dlls
 
     @overrides
     def duplicate_required_dlls(self, target : str):

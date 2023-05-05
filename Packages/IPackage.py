@@ -90,7 +90,7 @@ class IPackage(EnforceOverrides, metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractmethod
-    def duplicate_required_dlls(self, target : str) -> list[str]:
+    def duplicate_required_dlls(self, target : str):
         """
         Copy DLLs from their library location to beside the target executable.
         """
