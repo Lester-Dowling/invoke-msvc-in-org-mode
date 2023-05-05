@@ -75,6 +75,13 @@ class IPackage(EnforceOverrides, metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractmethod
+    def locate_required_dlls(self, target : str) -> set[str]:
+        """
+        Locate the canonical path to each required DLL.
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
     def duplicate_required_dlls(self, target : str) -> list[str]:
         """
         Copy DLLs from their library location to beside the target executable.

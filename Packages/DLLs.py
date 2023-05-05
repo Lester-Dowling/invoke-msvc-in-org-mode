@@ -48,4 +48,8 @@ def required_by_target(target : str) -> set[str]:
     cp = subprocess.run(dumpbin_clo, capture_output=True, text=True)
     dll_list = re.findall(r'[^ \t]+\.dll', cp.stdout) # Assumes DLL filename has no spaces.
     dlls_to_be_copied = _remove_system_dlls(dll_list)
+    if TARGET.name in dlls_to_be_copied:
+        dlls_to_be_copied.remove(TARGET.name)
+    if str(TARGET) in dlls_to_be_copied:
+        dlls_to_be_copied.remove(str(TARGET))
     return(dlls_to_be_copied)
