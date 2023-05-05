@@ -14,9 +14,9 @@ class Boost(IPackage):
     environment variable.
     """
 
-    def __init__(self, argv : list[str]):
+    def __init__(self, argv : list[str] = []):
         # Boost root dir:
-        self._root = Path(os.environ['BOOST_ROOT'])
+        self._root = Path(os.environ['BOOST_ROOT']).resolve()
         if not self._root.exists():
             raise Exception(f"No Boost root: {self._root}")
 
@@ -27,6 +27,7 @@ class Boost(IPackage):
 
         # Boost lib dir:
         self._boost_lib_dir = self._root / ".." / ".." / "lib"
+        self._boost_lib_dir = self._boost_lib_dir.resolve()
         if not self._boost_lib_dir.exists():
             raise Exception(f"No Boost lib dir: {self._boost_lib_dir}")
 
@@ -44,7 +45,7 @@ class Boost(IPackage):
         self._uncopied_dlls = set()
 
         # Compiler options read from json file:
-        script_filename = Path(os.path.realpath(__file__))
+        script_filename = Path(os.path.realpath(__file__)).resolve()
         user_options_filename = script_filename.with_name('boost.json')
         if user_options_filename.exists():
             with open(user_options_filename) as f:
@@ -119,7 +120,7 @@ class Boost(IPackage):
     @property
     @overrides
     def lib_dir(self) -> Path:
-        return Path(self._boost_lib_dir)
+        return Path(self._boost_lib_dir).resolve()
 
     @property
     @overrides
@@ -137,7 +138,9 @@ class Boost(IPackage):
         for dll in required_dlls:
             DLL_PATH = self.lib_dir / dll
             if DLL_PATH.exists():
-                located_dlls.add(dll)
+                located_dlls.add(DLL_PATH)
+                recursed_required_dlls = self.locate_required_dlls(DLL_PATH)
+                located_dlls |= recursed_required_dlls
             else:
                 self._uncopied_dlls.add(dll)
         return located_dlls
@@ -148,7 +151,7 @@ class Boost(IPackage):
         Copy DLLs from their library location to beside the target executable.
         """
         dlls_to_be_copied = self.locate_required_dlls(target)
-        DEST_PATH = Path(target).parent # Copy DLL beside target executable.
+        DEST_PATH = Path(target).parent.resolve() # Copy DLL beside target executable.
         for dll_path in dlls_to_be_copied:
             shutil.copy2(dll_path, DEST_PATH)
             logging.debug("Copied required DLL: {}".format(str(dll_path)))

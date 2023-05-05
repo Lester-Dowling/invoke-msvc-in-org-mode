@@ -39,7 +39,7 @@ def required_by_target(target : str) -> set[str]:
     """
     Find out which DLLs are required by the given target executable.
     """
-    TARGET = Path(target) # The target executable.
+    TARGET = Path(target).resolve() # The target executable.
     dumpbin_exe = shutil.which('dumpbin')
     if dumpbin_exe is None:
         raise Exception('No such executable: dumpbin')

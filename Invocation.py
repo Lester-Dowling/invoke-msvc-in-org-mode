@@ -1,3 +1,4 @@
+import os
 import subprocess
 import logging
 from pathlib import Path
@@ -91,10 +92,11 @@ class Invocation:
         logging.debug(f'self.flags == {self.flags}')
         logging.debug(f'self.libs == {self.libs}')
 
-        CWD = Path.cwd()
-        SRC = Path(self.src_path)  # The temp C++ file produced by Org mode.
-        TARGET = Path(self.target) # The target executable.
-        OBJ = CWD / (SRC.stem + ".obj") # Obj file to be deleted later.
+        SRC = Path(self.src_path).resolve()  # The temp C++ file produced by Org mode.
+        TARGET = Path(self.target).resolve() # The target executable.
+        os.chdir(str(SRC.parent))            # Set cwd to the location of SRC.
+        CWD = Path.cwd()                     # The cwd which should now be parent of SRC.
+        OBJ = CWD / (SRC.stem + ".obj")      # Obj file to be deleted later.
         logging.debug(f'CWD    == {str(CWD)}')
         logging.debug(f'SRC    == {str(SRC)}')
         logging.debug(f'TARGET == {str(TARGET)}')

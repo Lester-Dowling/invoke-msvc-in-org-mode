@@ -29,6 +29,9 @@ cout << "Does " << p << " exist? ";
 cout << boolalpha << fs::exists(p) << endl;
 #+end_src
 
+#+RESULTS: verify-documents-folder-exists
+: Does "C:\Users\ljdowling\Documents" exist? The directory exists!
+
 * Determine if doc.txt file exists
 
 #+name: verify-doc-txt-file-exists

@@ -8,6 +8,7 @@ import Packages.DLLs
 print(Packages.DLLs._system_dlls())
 #+END_SRC
 
+
 * Test Packages.DLLs
 
 #+BEGIN_SRC python   :results output
@@ -21,11 +22,23 @@ print(DLLs.required_by_target(p))
 
 * Test Packages.Boost
 
+Verify empty ctor:
+
+#+BEGIN_SRC python   :results output
+import logging
+from pathlib import Path
+import Packages.Boost as Boost
+b = Boost()
+print( b.should_use )
+#+END_SRC
+
+Verify one library:
+
 #+BEGIN_SRC python   :results output
 import logging
 from pathlib import Path
 import Packages.Boost as Boost
 b = Boost(["-lboost_filesystem"])
+print(b.should_use)
+print(b.release_libs)
 #+END_SRC
-
-#+RESULTS:

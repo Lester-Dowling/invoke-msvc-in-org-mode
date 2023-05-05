@@ -10,7 +10,7 @@ class Common(IPackage):
     Common compiler and linker command line options for cl.exe.
     """
 
-    def __init__(self, argv : list[str]):
+    def __init__(self, argv : list[str] = []):
         # Make a copy of argv:
         self._argv = argv[:]
 

@@ -14,7 +14,7 @@ class Vcpkg(IPackage):
     environment variable.
     """
 
-    def __init__(self, argv : list[str]):
+    def __init__(self, argv : list[str] = []):
         # Vcpkg root dir:
         self._root = Path(os.environ['VCPKG_ROOT'])
         if not self._root.exists():
