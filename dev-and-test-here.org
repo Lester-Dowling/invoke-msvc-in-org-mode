@@ -9,9 +9,12 @@ print(Packages.DLLs._system_dlls())
 
 
 #+BEGIN_SRC python   :results output
-import Packages.DLLs
-print(Packages.DLLs.required_by_target("C:/vcpkg/installed/x64-windows/bin/opencv_core4.dll"))
+import logging
+import Packages.MSVC2022 as MSVC2022
+import Packages.DLLs as DLLs
+MSVC2022.setup_env()
+print(DLLs.required_by_target("C:/vcpkg/installed/x64-windows/bin/opencv_core4.dll"))
 #+END_SRC
 
 #+RESULTS:
-
+: {'api-ms-win-crt-string-l1-1-0.dll', 'api-ms-win-crt-filesystem-l1-1-0.dll', 'C:\\vcpkg\\installed\\x64-windows\\bin\\opencv_core4.dll', 'api-ms-win-crt-time-l1-1-0.dll', 'zlib1.dll', 'api-ms-win-crt-convert-l1-1-0.dll', 'CONCRT140.dll'}

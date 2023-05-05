@@ -9,5 +9,5 @@ if __name__ == '__main__':
                         filename='invoke-msvc-2022.log',
                         format='%(asctime)s\t%(levelname)s\t%(message)s')
     MSVC2022.setup_env()
-    msvc = Invocation(sys.argv)
-    msvc.run()
+    compiler = Invocation(sys.argv)
+    compiler.run()

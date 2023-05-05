@@ -1,14 +1,10 @@
 {
 	"list": [
-        "MSVCP140.dll",
+		"CONCRT140.dll",
 		"KERNEL32.dll",
-		"VCRUNTIME140.dll",
+        "MSVCP140.dll",
         "VCRUNTIME140_1.dll",
-		"api-ms-win-crt-runtime-l1-1-0.dll",
-        "api-ms-win-crt-heap-l1-1-0.dll",
-		"api-ms-win-crt-environment-l1-1-0.dll",
-        "api-ms-win-crt-math-l1-1-0.dll",
-		"api-ms-win-crt-stdio-l1-1-0.dll",
-        "api-ms-win-crt-locale-l1-1-0.dll"
+		"VCRUNTIME140.dll",
+		"zlib1.dll"
 	]
 }

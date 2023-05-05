@@ -22,19 +22,20 @@ def _system_dlls() -> set[str]:
 
 
 
-def _remove_system_dlls(dll_list : list[str]) -> list[str]:
+def _remove_system_dlls(dll_list : list[str]) -> set[str]:
     """
     Remove standard system-supplied DLLs from the given DLL list.
     """
-    dlls_without_system = []
+    dlls_without_system = set()
     for dll in dll_list:
-        if not dll in _system_dlls():
-            dlls_without_system.append(dll)
+        if not dll.startswith("api-ms-win-crt-"):
+            if not dll in _system_dlls():
+                dlls_without_system.add(dll)
     return(dlls_without_system)
 
 
 
-def required_by_target(target : str) -> list[str]:
+def required_by_target(target : str) -> set[str]:
     """
     Find out which DLLs are required by the given target executable.
     """
