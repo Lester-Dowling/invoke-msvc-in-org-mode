@@ -12,13 +12,13 @@ from functools import lru_cache
 def _system_dlls() -> set[str]:
     # List of standard system DLLs read from json file:
     script_path = Path(os.path.realpath(__file__))
-    system_dll_path = script_path.with_name('boost.json')
+    system_dll_path = script_path.with_name('system-dlls.json')
     if system_dll_path.exists():
         with open(system_dll_path) as f:
             system_dll = json.load(f)
-            return(system_dll['defines'])
+            return(system_dll['list'])
     else:
-        return([])
+        return(set())
 
 
 
