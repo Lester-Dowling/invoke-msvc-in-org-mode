@@ -22,7 +22,7 @@ class Invocation:
     Eg: clang++ -std=gnu++2a -O3
     """
 
-    def __init__(self, argv) -> None:
+    def __init__(self, argv : list[str]):
         self._compiler = "cl.exe"
         self._target = ""
         self._src_path = ""

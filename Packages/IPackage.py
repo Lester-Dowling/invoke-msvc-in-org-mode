@@ -74,6 +74,14 @@ class IPackage(EnforceOverrides, metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
+    @property
+    @abstractmethod
+    def uncopied_dlls(self) -> set[str]:
+        """
+        The set of DLLs which were not copied.
+        """
+        raise NotImplementedError()
+
     @abstractmethod
     def locate_required_dlls(self, target : str) -> set[str]:
         """

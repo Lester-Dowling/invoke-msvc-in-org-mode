@@ -14,7 +14,7 @@ class Boost(IPackage):
     environment variable.
     """
 
-    def __init__(self, argv) -> None:
+    def __init__(self, argv : list[str]):
         # Boost root dir:
         self._root = Path(os.environ['BOOST_ROOT'])
         if not self._root.exists():
@@ -121,6 +121,11 @@ class Boost(IPackage):
     def lib_dir(self) -> Path:
         return Path(self._boost_lib_dir)
 
+    @property
+    @overrides
+    def uncopied_dlls(self) -> set[str]:
+        return self._uncopied_dlls
+
     @overrides
     def locate_required_dlls(self, target : str) -> set[str]:
         """
@@ -136,7 +141,6 @@ class Boost(IPackage):
             else:
                 self._uncopied_dlls.add(dll)
         return(located_dlls)
-
 
     @overrides
     def duplicate_required_dlls(self, target : str):

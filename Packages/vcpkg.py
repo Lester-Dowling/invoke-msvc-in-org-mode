@@ -14,7 +14,7 @@ class Vcpkg(IPackage):
     environment variable.
     """
 
-    def __init__(self, argv) -> None:
+    def __init__(self, argv : list[str]):
         # Vcpkg root dir:
         self._root = Path(os.environ['VCPKG_ROOT'])
         if not self._root.exists():
@@ -50,6 +50,9 @@ class Vcpkg(IPackage):
 
         # List of Paths to Vcpkg release lib files:
         self._release_libs = list()
+
+        # List of DLLs which were not copied:
+        self._uncopied_dlls = set()
 
         # Compiler options read from json file:
         script_filename = Path(os.path.realpath(__file__))
@@ -129,20 +132,34 @@ class Vcpkg(IPackage):
     def lib_dir(self) -> Path:
         return Path(self._lib_dir)
 
+    @property
+    @overrides
+    def uncopied_dlls(self) -> set[str]:
+        return self._uncopied_dlls
 
     @overrides
-    def duplicate_required_dlls(self, target : str) -> list[str]:
+    def locate_required_dlls(self, target : str) -> set[str]:
+        """
+        Locate the canonical path to each required DLL.
+        """
+        required_dlls = Packages.DLLs.required_by_target(target)
+        self._uncopied_dlls = set()
+        located_dlls = set()
+        for dll in required_dlls:
+            DLL_PATH = self.lib_dir / dll
+            if DLL_PATH.exists():
+                located_dlls.add(dll)
+            else:
+                self._uncopied_dlls.add(dll)
+        return(located_dlls)
+
+    @overrides
+    def duplicate_required_dlls(self, target : str):
         """
         Copy DLLs from their library location to beside the target executable.
         """
-        dlls_to_be_copied = DLLs.required_by_target(target)
-        uncopied_dlls = []
-        for dll in dlls_to_be_copied:
-            DEST_PATH = Path(target).parent # Copy DLL beside target executable.
-            SRC_PATH = self.lib_dir / dll
-            if SRC_PATH.exists():
-                shutil.copy2(SRC_PATH, DEST_PATH)
-                logging.debug("Copied required DLL: {}".format(str(SRC_PATH)))
-            else:
-                uncopied_dlls.append(dll)
-        return(uncopied_dlls)
+        dlls_to_be_copied = self.locate_required_dlls(target)
+        DEST_PATH = Path(target).parent # Copy DLL beside target executable.
+        for dll_path in dlls_to_be_copied:
+            shutil.copy2(dll_path, DEST_PATH)
+            logging.debug("Copied required DLL: {}".format(str(dll_path)))

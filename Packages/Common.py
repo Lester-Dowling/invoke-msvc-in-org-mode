@@ -10,7 +10,7 @@ class Common(IPackage):
     Common compiler and linker command line options for cl.exe.
     """
 
-    def __init__(self, argv) -> None:
+    def __init__(self, argv : list[str]):
         # Make a copy of argv:
         self._argv = argv[:]
 
@@ -79,8 +79,17 @@ class Common(IPackage):
     @property
     @overrides
     def lib_dir(self) -> Path:
-        return None
+        return Path()
+
+    @property
+    @overrides
+    def uncopied_dlls(self) -> set[str]:
+        return set()
 
     @overrides
-    def duplicate_required_dlls(self, target : str) -> list[str]:
-        return []
+    def locate_required_dlls(self, target : str) -> set[str]:
+        return set()
+
+    @overrides
+    def duplicate_required_dlls(self, target : str):
+        pass
