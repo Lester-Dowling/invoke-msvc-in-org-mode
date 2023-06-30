@@ -29,6 +29,7 @@ class Boost(IPackage):
 
         # Boost lib filename regexes:
         self._arg_regex_str = "-lboost_(.+)"
+        self._arg_include_regex_str = "^-lboost$"
         self._lib_debug_version_regex_str = ".+-gd-.+"
 
         # Make a copy of argv:
@@ -39,6 +40,9 @@ class Boost(IPackage):
 
         # List of DLLs which were not copied:
         self._uncopied_dlls = set()
+
+        # Should Boost be used in compilation?
+        self._should_use = False
 
         # Compiler options read from json file:
         script_filename = Path(os.path.realpath(__file__)).resolve()
@@ -51,13 +55,18 @@ class Boost(IPackage):
         # Find the requested Boost libs in argv:
         arg_libs = list()  # List of Boost libs found in argv.
         re_arg = re.compile(self._arg_regex_str)
+        re_arg_include = re.compile(self._arg_include_regex_str)
         unused_argv = list()  # argv without Boost options.
         for arg in self._argv:
-            m = re_arg.match(arg)
+            m = re_arg_include.match(arg)
             if m:
-                arg_libs.append(m.group(1))
+                self._should_use = True
             else:
-                unused_argv.append(arg)
+                m = re_arg.match(arg)
+                if m:
+                    arg_libs.append(m.group(1))
+                else:
+                    unused_argv.append(arg)
         self._argv = unused_argv  # Keep the args not used in this package.
 
         # Compose the filename regex for the requested Boost libs:
@@ -81,7 +90,7 @@ class Boost(IPackage):
     @property
     @overrides
     def should_use(self) -> bool:
-        return 0 < len(self._release_libs)
+        return self._should_use or 0 < len(self._release_libs)
 
     @property
     @overrides
