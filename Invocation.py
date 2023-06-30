@@ -2,8 +2,9 @@ import os
 import subprocess
 import logging
 from pathlib import Path
-from Packages.Boost import Boost
 from Packages.Common import Common
+from Packages.Boost import Boost
+from Packages.Vcpkg import Vcpkg
 
 
 def bounded_incr(idx, bound):
@@ -30,7 +31,8 @@ class Invocation:
         self._libs = list()
         self._common = Common(argv)
         self._boost = Boost(self._common.argv)
-        self._argv = self._boost.argv
+        self._vcpkg = Vcpkg(self._boost.argv)
+        self._argv = self._vcpkg.argv
 
         # Arg: output target filename prefixed with "-o"
         idx = 0
@@ -116,11 +118,20 @@ class Invocation:
             for d in self._boost.defines:
                 cl_clo.append("/D" + d)
 
+        if self._vcpkg.should_use:
+            for d in self._vcpkg.defines:
+                cl_clo.append("/D" + d)
+
         for d in self._common.include_dirs:
             cl_clo.append("/I" + str(Path(d)))
 
-        for d in self._boost.include_dirs:
-            cl_clo.append("/I" + str(Path(d)))
+        if self._boost.should_use:
+            for d in self._boost.include_dirs:
+                cl_clo.append("/I" + str(Path(d)))
+
+        if self._vcpkg.should_use:
+            for d in self._vcpkg.include_dirs:
+                cl_clo.append("/I" + str(Path(d)))
 
         cl_clo.append(str(SRC))
 
@@ -133,6 +144,10 @@ class Invocation:
 
         if self._boost.should_use:
             for d in self._boost.release_libs:
+                cl_clo.append(str(d))
+
+        if self._vcpkg.should_use:
+            for d in self._vcpkg.release_libs:
                 cl_clo.append(str(d))
 
         logging.debug("cl_clo == {}".format(cl_clo))

@@ -5,6 +5,7 @@ import shutil
 import logging
 from overrides import overrides
 from pathlib import Path
+from functools import lru_cache
 from Packages.IPackage import IPackage
 import Packages.DLLs
 
@@ -19,11 +20,6 @@ class Boost(IPackage):
         self._root = Path(os.environ['BOOST_ROOT']).resolve()
         if not self._root.exists():
             raise Exception(f"No Boost root: {self._root}")
-
-        # Vcpkg include dir:
-        self._include_dir = self._root
-        if not self._include_dir.exists():
-            raise Exception(f"No Boost include dir: {self._include_dir}")
 
         # Boost lib dir:
         self._boost_lib_dir = self._root / ".." / ".." / "lib"
@@ -104,8 +100,12 @@ class Boost(IPackage):
 
     @property
     @overrides
+    @lru_cache
     def include_dirs(self) -> list[str]:
-        return [str(self._include_dir)]
+        d = self._root
+        if not d.exists():
+            raise Exception(f"No Boost include dir: {d}")
+        return [str(d)]
 
     @property
     @overrides

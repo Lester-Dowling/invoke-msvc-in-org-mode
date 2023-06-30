@@ -5,6 +5,7 @@ import shutil
 import logging
 from overrides import overrides
 from pathlib import Path
+from functools import lru_cache
 from Packages.IPackage import IPackage
 import Packages.DLLs
 
@@ -25,25 +26,13 @@ class Vcpkg(IPackage):
         if not self._installed_dir.exists():
             raise Exception(f"No vcpkg installed dir: {self._installed_dir}")
 
-        # Vcpkg include dir:
-        self._include_dir = self._installed_dir / "include"
-        if not self._include_dir.exists():
-            raise Exception(f"No vcpkg include dir: {self._include_dir}")
-
-        # Vcpkg lib dir:
-        self._lib_dir = self._installed_dir / "lib"
-        if not self._lib_dir.exists():
-            raise Exception(f"No vcpkg lib dir: {self._lib_dir}")
-
-        # Vcpkg dll dir:
-        self._dll_dir = self._installed_dir / "bin"
-        if not self._dll_dir.exists():
-            raise Exception(f"No vcpkg dll dir: {self._dll_dir}")
+        # Vcpkg debug dir:
+        self._debug_dir = self._installed_dir / "debug"
+        if not self._debug_dir.exists():
+            raise Exception(f"No vcpkg debug dir: {self._debug_dir}")
 
         # Vcpkg lib filenames:
-        self._lib_filenames = list(self._lib_dir.glob('*.lib'))
         self._arg_regex_str = "-lvcpkg_(.+)"
-        self._lib_debug_version_regex_str = ".+-gd-.+"
 
         # Make a copy of argv:
         self._argv = argv[:]
@@ -63,34 +52,28 @@ class Vcpkg(IPackage):
             self._defines = user_clo['defines']
 
         # Find the requested Vcpkg libs in argv:
-        arg_libs = list()  # List of Vcpkg libs found in argv.
+        requested_libs = list()  # List of Vcpkg libs found in argv.
         re_arg = re.compile(self._arg_regex_str)
         unused_argv = list()  # argv without Vcpkg options.
         for arg in self._argv:
             m = re_arg.match(arg)
             if m:
-                arg_libs.append(m.group(1))
+                requested_libs.append(m.group(1))
             else:
                 unused_argv.append(arg)
         self._argv = unused_argv  # Keep the args not used in this package.
 
-        # Compose the filename regex for the requested Vcpkg libs:
-        re_lib_filenames = list()
-        for l in arg_libs:
-            re_lib_filenames.append(re.compile(f".+{l}-.+\.lib"))
-
         # Find the Vcpkg release lib files:
-        re_debug_version_lib = re.compile(self._lib_debug_version_regex_str)
-        self._debug_libs = list()  # List of Paths to Vcpkg debug lib files.
         self._release_libs = list()
-        for f in sorted(self._lib_dir.glob('*.lib')):
-            fstr = str(f)
-            for re_lib_filename in re_lib_filenames:
-                if re_lib_filename.match(fstr):
-                    if re_debug_version_lib.match(fstr):
-                        self._debug_libs.append(fstr)
-                    else:
-                        self._release_libs.append(fstr)
+        lib_paths = list(self.lib_dir.glob('*.lib')) # All libs in the lib dir.
+        for requested_lib in requested_libs:
+            self._release_libs = [str(n) for n in lib_paths if n.stem.startswith(requested_lib)]
+
+        # Find the Vcpkg debug lib files:
+        self._debug_libs = list()
+        lib_paths = list(self.debug_lib_dir.glob('*.lib')) # All libs in the debug lib dir.
+        for requested_lib in requested_libs:
+            self._debug_libs = [str(n) for n in lib_paths if n.stem.startswith(requested_lib)]
 
     @property
     @overrides
@@ -114,8 +97,12 @@ class Vcpkg(IPackage):
 
     @property
     @overrides
+    @lru_cache
     def include_dirs(self) -> list[str]:
-        return [self._include_dir]
+        d = self._installed_dir / "include"
+        if not d.exists():
+            raise Exception(f"No vcpkg include dir: {d}")
+        return [str(d)]
 
     @property
     @overrides
@@ -128,25 +115,66 @@ class Vcpkg(IPackage):
         return self._release_libs
 
     @property
+    def debug_libs(self) -> list[str]:
+        return self._debug_libs
+
+    @property
     @overrides
+    @lru_cache
     def lib_dir(self) -> Path:
-        return Path(self._lib_dir)
+        d = self._installed_dir / "lib"
+        if not d.exists():
+            raise Exception(f"No vcpkg lib dir: {d}")
+        return d
+
+    @property
+    @lru_cache
+    def debug_lib_dir(self) -> Path:
+        d = self._debug_dir / "lib"
+        if not d.exists():
+            raise Exception(f"No vcpkg debug lib dir: {d}")
+        return d
+
+    @property
+    @lru_cache
+    def dll_dir(self) -> Path:
+        d = self._installed_dir / "bin"
+        if not d.exists():
+            raise Exception(f"No vcpkg dll dir: {d}")
+        return d
+
+    @property
+    @lru_cache
+    def debug_dll_dir(self) -> Path:
+        d = self._debug_dir / "bin"
+        if not d.exists():
+            raise Exception(f"No vcpkg debug dll dir: {d}")
+        return d
 
     @property
     @overrides
     def uncopied_dlls(self) -> set[str]:
         return self._uncopied_dlls
 
+    @property
+    @lru_cache
+    def release_libs(self) -> list[Path]:
+        return list(self.lib_dir.glob('*.lib'))
+
+    @property
+    @lru_cache
+    def debug_libs(self) -> list[Path]:
+        return list(self.debug_lib_dir.glob('*.lib'))
+
     @overrides
     def locate_required_dlls(self, target : str) -> set[str]:
         """
         Locate the canonical path to each required DLL.
         """
-        required_dlls = Packages.DLLs.required_by_target(target)
         self._uncopied_dlls = set()
         located_dlls = set()
-        for dll in required_dlls:
-            DLL_PATH = self.lib_dir / dll
+        for dll in Packages.DLLs.required_by_target(target):
+            DLL_PATH = self.dll_dir / dll
             if DLL_PATH.exists():
                 located_dlls.add(dll)
             else:
