@@ -33,6 +33,7 @@ class Vcpkg(IPackage):
 
         # Vcpkg lib filenames:
         self._arg_regex_str = "-lvcpkg_(.+)"
+        self._arg_include_regex_str = "^-lboost$"
 
         # Make a copy of argv:
         self._argv = argv[:]
@@ -43,7 +44,11 @@ class Vcpkg(IPackage):
         # List of DLLs which were not copied:
         self._uncopied_dlls = set()
 
+        # Should include Boost in compilation?
+        self._should_use = False
+
         # Compiler options read from json file:
+        self._defines = list()
         script_filename = Path(os.path.realpath(__file__))
         user_options_filename = script_filename.with_name( 'vcpkg.json')
         if user_options_filename.exists():
@@ -54,13 +59,19 @@ class Vcpkg(IPackage):
         # Find the requested Vcpkg libs in argv:
         requested_libs = list()  # List of Vcpkg libs found in argv.
         re_arg = re.compile(self._arg_regex_str)
+        re_arg_include = re.compile(self._arg_include_regex_str)
         unused_argv = list()  # argv without Vcpkg options.
         for arg in self._argv:
-            m = re_arg.match(arg)
+            m = re_arg_include.match(arg)
             if m:
-                requested_libs.append(m.group(1))
+                self._should_use = True
             else:
-                unused_argv.append(arg)
+                m = re_arg.match(arg)
+                if m:
+                    self._should_use = True
+                    requested_libs.append(m.group(1))
+                else:
+                    unused_argv.append(arg)
         self._argv = unused_argv  # Keep the args not used in this package.
 
         # Find the Vcpkg release lib files:
@@ -78,7 +89,7 @@ class Vcpkg(IPackage):
     @property
     @overrides
     def should_use(self) -> bool:
-        return 0 < len(self._release_libs)
+        return self._should_use or 0 < len(self._release_libs)
 
     @property
     @overrides
@@ -156,29 +167,3 @@ class Vcpkg(IPackage):
     @overrides
     def uncopied_dlls(self) -> set[str]:
         return self._uncopied_dlls
-
-    @overrides
-    def locate_required_dlls(self, target : str) -> set[str]:
-        """
-        Locate the canonical path to each required DLL.
-        """
-        self._uncopied_dlls = set()
-        located_dlls = set()
-        for dll in Packages.DLLs.required_by_target(target):
-            DLL_PATH = self.dll_dir / dll
-            if DLL_PATH.exists():
-                located_dlls.add(dll)
-            else:
-                self._uncopied_dlls.add(dll)
-        return(located_dlls)
-
-    @overrides
-    def duplicate_required_dlls(self, target : str):
-        """
-        Copy DLLs from their library location to beside the target executable.
-        """
-        dlls_to_be_copied = self.locate_required_dlls(target)
-        DEST_PATH = Path(target).parent # Copy DLL beside target executable.
-        for dll_path in dlls_to_be_copied:
-            shutil.copy2(dll_path, DEST_PATH)
-            logging.debug("Copied required DLL: {}".format(str(dll_path)))

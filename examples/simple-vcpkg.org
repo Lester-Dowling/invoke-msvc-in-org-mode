@@ -1,0 +1,13 @@
+* Verify Poco version
+
+#+name: check_poco_version
+#+header: :exports  results   :results  scalar
+#+header: :libs     -lvcpkg_poco
+#+header: :includes <iostream> <Poco/Version.h>
+#+begin_src C++
+using namespace std;
+cout << "POCO version is " << POCO_VERSION << endl;
+#+end_src
+
+#+RESULTS: check_poco_version
+: POCO version is 17564672

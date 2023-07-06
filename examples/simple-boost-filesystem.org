@@ -2,6 +2,7 @@
 
 #+name: check-boost-version
 #+header: :exports  results   :results  scalar
+#+header: :libs     -lboost
 #+header: :includes <iostream> <boost/version.hpp>
 #+begin_src C++
 using namespace std;
@@ -28,9 +29,6 @@ std::cout.imbue(std::locale(std::cout.getloc(), new tf_dir_exists));
 cout << "Does " << p << " exist? ";
 cout << boolalpha << fs::exists(p) << endl;
 #+end_src
-
-#+RESULTS: verify-documents-folder-exists
-: Does "C:\Users\ljdowling\Documents" exist? The directory exists!
 
 * Determine if doc.txt file exists
 

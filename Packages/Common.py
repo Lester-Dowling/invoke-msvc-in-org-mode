@@ -83,6 +83,11 @@ class Common(IPackage):
 
     @property
     @overrides
+    def dll_dir(self) -> Path:
+        return Path()
+
+    @property
+    @overrides
     def uncopied_dlls(self) -> set[str]:
         return set()
 
