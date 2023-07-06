@@ -159,3 +159,4 @@ class Invocation:
             logging.debug("Compiler output:\n{}\n{}".format(cp.stdout,cp.stderr))
             raise Exception("Compilation failed: \n{}".format(cp.stdout))
         self._boost.duplicate_required_dlls(self.target)
+        self._vcpkg.duplicate_required_dlls(self.target)

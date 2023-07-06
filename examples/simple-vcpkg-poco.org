@@ -1,0 +1,48 @@
+* Verify Poco version
+
+#+name: check_poco_version
+#+header: :exports  results   :results  scalar
+#+header: :libs     -lvcpkg_Poco
+#+header: :includes <iostream> <Poco/Version.h>
+#+begin_src C++
+using namespace std;
+cout << "POCO version is " << POCO_VERSION << endl;
+#+end_src
+
+
+#+name: check_poco_foundation
+#+header: :exports  results   :results  scalar
+#+header: :libs     -lvcpkg_Poco
+#+header: :includes <iostream> <Poco/Foundation.h> <cmath>
+#+begin_src C++
+using namespace std;
+Poco::Int8 a = pow(2,4);
+Poco::UInt8 b = pow(2,5);
+Poco::Int64 c = pow(2,16);
+cout << "a = " << int(a) << endl;
+cout << "b = " << int(b) << endl;
+cout << "c = " << c << endl;
+#+end_src
+
+
+#+name: check_poco_exceptions
+#+header: :exports  results   :results  scalar
+#+header: :libs     -lvcpkg_Poco
+#+header: :includes <iostream> <Poco/Exception.h> <cmath>
+#+begin_src C++
+using namespace std;
+auto throwing_function = [](){
+  throw Poco::RuntimeException{"This is a runtime exception from Poco."};
+ };
+
+try {
+  throwing_function();
+  cout << "No throw!" << endl;
+ }
+ catch (Poco::Exception const& e) {
+   cout << "Exception: " << e.what() << endl;
+ }
+#+end_src
+
+#+RESULTS: check_poco_exceptions
+: Exception: Runtime exception

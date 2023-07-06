@@ -103,6 +103,7 @@ class IPackage(EnforceOverrides, metaclass=ABCMeta):
         located_dlls = set()
         for dll in Packages.DLLs.required_by_target(target):
             dll_path = self.dll_dir / dll
+            logging.debug("dll_path == {}".format(dll_path))
             if dll_path.exists():
                 located_dlls.add(dll_path)
                 recursed_required_dlls = self.locate_required_dlls(str(dll_path))
@@ -116,9 +117,11 @@ class IPackage(EnforceOverrides, metaclass=ABCMeta):
         """
         Copy DLLs from their library location to beside the target executable.
         """
-        dlls_to_be_copied = self.locate_required_dlls(target)
-        dest_path = Path(target).parent # Copy DLL beside target executable.
-        logging.debug("Dest path of DLLs: {}".format(str(dest_path)))
-        for dll_path in dlls_to_be_copied:
-            shutil.copy2(dll_path, dest_path)
-            logging.debug("Copied required DLL: {}".format(str(dll_path)))
+        if self.should_use:
+            dlls_to_be_copied = self.locate_required_dlls(target)
+            dest_path = Path(target).parent # Copy DLL beside target executable.
+            logging.debug("Dest path of DLLs: {}".format(str(dest_path)))
+            for dll_path in dlls_to_be_copied:
+                shutil.copy2(dll_path, dest_path)
+                logging.debug("Copied required DLL: {}".format(str(dll_path)))
+            logging.debug("Uncopied DLLs: {}".format(self._uncopied_dlls))

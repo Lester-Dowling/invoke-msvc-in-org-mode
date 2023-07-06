@@ -1,13 +1,9 @@
 import os
 import re
 import json
-import shutil
-import logging
 from overrides import overrides
 from pathlib import Path
-from functools import lru_cache
 from Packages.IPackage import IPackage
-import Packages.DLLs
 
 class Vcpkg(IPackage):
     """
@@ -108,7 +104,6 @@ class Vcpkg(IPackage):
 
     @property
     @overrides
-    @lru_cache
     def include_dirs(self) -> list[str]:
         d = self._installed_dir / "include"
         if not d.exists():
@@ -131,7 +126,6 @@ class Vcpkg(IPackage):
 
     @property
     @overrides
-    @lru_cache
     def lib_dir(self) -> Path:
         d = self._installed_dir / "lib"
         if not d.exists():
@@ -139,7 +133,6 @@ class Vcpkg(IPackage):
         return d
 
     @property
-    @lru_cache
     def debug_lib_dir(self) -> Path:
         d = self._debug_dir / "lib"
         if not d.exists():
@@ -148,7 +141,6 @@ class Vcpkg(IPackage):
 
     @property
     @overrides
-    @lru_cache
     def dll_dir(self) -> Path:
         d = self._installed_dir / "bin"
         if not d.exists():
@@ -156,7 +148,6 @@ class Vcpkg(IPackage):
         return d
 
     @property
-    @lru_cache
     def debug_dll_dir(self) -> Path:
         d = self._debug_dir / "bin"
         if not d.exists():
