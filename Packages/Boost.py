@@ -21,12 +21,6 @@ class Boost(IPackage):
         if not self._root.exists():
             raise Exception(f"No Boost root: {self._root}")
 
-        # Boost lib dir:
-        self._boost_lib_dir = self._root / ".." / ".." / "lib"
-        self._boost_lib_dir = self._boost_lib_dir.resolve()
-        if not self._boost_lib_dir.exists():
-            raise Exception(f"No Boost lib dir: {self._boost_lib_dir}")
-
         # Boost lib filename regexes:
         self._arg_regex_str = "-lboost_(.+)"
         self._arg_include_regex_str = "^-lboost$"
@@ -72,13 +66,13 @@ class Boost(IPackage):
         # Compose the filename regex for the requested Boost libs:
         re_lib_filenames = list()
         for l in arg_libs:
-            re_lib_filenames.append(re.compile(f".+{l}-.+\.lib"))
+            re_lib_filenames.append(re.compile(f".+{l}-.+\\.lib"))
 
         # Find the Boost release lib files:
         re_debug_version_lib = re.compile(self._lib_debug_version_regex_str)
         self._debug_libs = list()  # List of Paths to Boost debug lib files.
         self._release_libs = list()
-        for f in sorted(self._boost_lib_dir.glob('*.lib')):
+        for f in sorted(self.lib_dir.glob('*.lib')):
             fstr = str(f)
             for re_lib_filename in re_lib_filenames:
                 if re_lib_filename.match(fstr):
@@ -128,8 +122,19 @@ class Boost(IPackage):
 
     @property
     @overrides
+    @lru_cache
     def lib_dir(self) -> Path:
-        return Path(self._boost_lib_dir).resolve()
+        d = self._root / ".." / ".." / "lib"
+        d = d.resolve()
+        if not d.exists():
+            raise Exception(f"No Boost lib dir: {d}")
+        return d
+
+    @property
+    @overrides
+    @lru_cache
+    def dll_dir(self) -> Path:
+        return self.lib_dir
 
     @property
     @overrides
@@ -148,7 +153,7 @@ class Boost(IPackage):
             DLL_PATH = self.lib_dir / dll
             if DLL_PATH.exists():
                 located_dlls.add(DLL_PATH)
-                recursed_required_dlls = self.locate_required_dlls(DLL_PATH)
+                recursed_required_dlls = self.locate_required_dlls(str(DLL_PATH))
                 located_dlls |= recursed_required_dlls
             else:
                 self._uncopied_dlls.add(dll)

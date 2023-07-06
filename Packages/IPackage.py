@@ -76,6 +76,14 @@ class IPackage(EnforceOverrides, metaclass=ABCMeta):
 
     @property
     @abstractmethod
+    def dll_dir(self) -> Path:
+        """
+        The DLL directory for all the DLL files of the package.
+        """
+        raise NotImplementedError()
+
+    @property
+    @abstractmethod
     def uncopied_dlls(self) -> set[str]:
         """
         The set of DLLs which were not copied.

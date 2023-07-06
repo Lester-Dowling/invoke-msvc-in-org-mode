@@ -136,6 +136,7 @@ class Vcpkg(IPackage):
         return d
 
     @property
+    @overrides
     @lru_cache
     def dll_dir(self) -> Path:
         d = self._installed_dir / "bin"
@@ -155,16 +156,6 @@ class Vcpkg(IPackage):
     @overrides
     def uncopied_dlls(self) -> set[str]:
         return self._uncopied_dlls
-
-    @property
-    @lru_cache
-    def release_libs(self) -> list[Path]:
-        return list(self.lib_dir.glob('*.lib'))
-
-    @property
-    @lru_cache
-    def debug_libs(self) -> list[Path]:
-        return list(self.debug_lib_dir.glob('*.lib'))
 
     @overrides
     def locate_required_dlls(self, target : str) -> set[str]:
