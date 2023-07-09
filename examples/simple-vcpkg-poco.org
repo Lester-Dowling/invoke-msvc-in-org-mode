@@ -1,6 +1,8 @@
-* Verify Poco version
+# -*- coding: utf-8 -*-
+#+TITLE: Examples of Using POCO from Vcpkg
+#+AUTHOR: L. James Dowling
 
-#+name: check_poco_version
+** Verify POCO version
 #+header: :exports  results   :results  scalar
 #+header: :libs     -lvcpkg_Poco
 #+header: :includes <iostream> <Poco/Version.h>
@@ -10,7 +12,7 @@ cout << "POCO version is " << POCO_VERSION << endl;
 #+end_src
 
 
-#+name: check_poco_foundation
+** POCO Foundation Types
 #+header: :exports  results   :results  scalar
 #+header: :libs     -lvcpkg_Poco
 #+header: :includes <iostream> <Poco/Foundation.h> <cmath>
@@ -25,10 +27,10 @@ cout << "c = " << c << endl;
 #+end_src
 
 
-#+name: check_poco_exceptions
+** POCO Exceptions
 #+header: :exports  results   :results  scalar
 #+header: :libs     -lvcpkg_Poco
-#+header: :includes <iostream> <Poco/Exception.h> <cmath>
+#+header: :includes <iostream> <Poco/Exception.h>
 #+begin_src C++
 using namespace std;
 auto throwing_function = [](){
@@ -40,9 +42,108 @@ try {
   cout << "No throw!" << endl;
  }
  catch (Poco::Exception const& e) {
-   cout << "Exception: " << e.what() << endl;
+   cout << e.name() << ':' << endl;
+   cout << e.message() << endl;
  }
 #+end_src
 
-#+RESULTS: check_poco_exceptions
-: Exception: Runtime exception
+
+** POCO Cloned Exceptions
+#+header: :exports  results   :results  scalar
+#+header: :libs     -lvcpkg_Poco
+#+header: :includes <iostream> <Poco/Exception.h>
+#+begin_src C++
+using namespace std;
+auto throwing_function = [](){
+  throw Poco::RuntimeException{"This is a runtime exception from Poco."};
+ };
+
+Poco::Exception *pe{};
+cout << "pe == " << pe << endl;
+try {
+  throwing_function();
+  cout << "No throw!" << endl;
+ }
+ catch (Poco::Exception const& e) {
+   pe = e.clone();
+ }
+cout << "pe == " << pe << endl;
+if (pe) {
+  cout << pe->name() << ':' << endl;
+  cout << pe->message() << endl;
+ }
+#+end_src
+
+
+** Some POCO String Functions
+#+header: :exports  results   :results  scalar
+#+header: :libs     -lvcpkg_Poco
+#+header: :includes <iostream> <vector> <Poco/String.h>
+#+begin_src C++
+using namespace std;
+// trim
+const std::string ss = "     a  std  string     ";
+const std::string ww = Poco::trim(ss);
+cout << '|' << ww << '|' << endl;
+// case conversion
+const std::string uu = Poco::toUpper(ww);
+cout << '|' << uu << '|' << endl;
+const int cc = Poco::icompare(ww,uu);
+cout << cc << endl;
+// translate chars
+const std::string ee = "Eiffel Tower";
+const std::string tt = Poco::translate(ee, "Eelo", "3310");
+cout << ee << endl;
+cout << tt << endl;
+// concatenation
+vector<string> colours = {"red", "green", "blue"};
+const std::string sep = ", ";
+const std::string rr = Poco::cat(sep, colours.begin(), colours.end());
+cout << "Colours == " << rr << endl;
+#+end_src
+
+
+** POCO Macro to Check Operating System
+#+header: :exports  results   :results  scalar
+#+header: :libs     -lvcpkg_Poco
+#+header: :includes <iostream>  <Poco/Foundation.h>  <Poco/ByteOrder.h>
+#+begin_src C++
+using namespace std;
+#if POCO_OS == POCO_OS_WINDOWS_NT
+cout << "This is Windows!" << endl;
+#elif POCO_OS == POCO_OS_LINUX
+cout << "This is Linux!" << endl;
+#endif
+
+#ifdef POCO_ARCH_LITTLE_ENDIAN
+cout << "This arch is little endian." << endl;
+#else
+cout << "This arch is BIG endian." << endl;
+#endif
+
+const Poco::UInt16 port = 80;
+const Poco::UInt16 networkPort = Poco::ByteOrder::toNetwork(port);
+cout << "Port         == " << int(port) << endl;
+cout << "Network Port == " << int(networkPort) << endl;
+#+end_src
+
+
+** POCO Machine Environment Info
+#+header: :exports  results   :results  scalar
+#+header: :libs     -lvcpkg_Poco
+#+header: :includes <iostream>  <Poco/Environment.h>
+#+begin_src C++
+using namespace std;
+using Poco::Environment;
+
+cout
+<< "OS Name:    " << Environment::osName() << endl
+<< "OS Version: " << Environment::osVersion() << endl
+<< "OS Arch:    " << Environment::osArchitecture() << endl
+<< "Node Name:  " << Environment::nodeName() << endl
+<< "Node ID:    " << Environment::nodeId() << endl;
+
+if (Environment::has("HOME"))
+  cout
+	<< "Home:       " << Environment::get("HOME") << endl;
+#+end_src
