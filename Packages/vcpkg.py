@@ -29,7 +29,7 @@ class Vcpkg(IPackage):
 
         # Vcpkg lib filenames:
         self._arg_regex_str = "-lvcpkg_(.+)"
-        self._arg_include_regex_str = "^-lboost$"
+        self._arg_include_regex_str = "^-lvcpkg$"
 
         # Make a copy of argv:
         self._argv = argv[:]
@@ -40,7 +40,7 @@ class Vcpkg(IPackage):
         # List of DLLs which were not copied:
         self._uncopied_dlls = set()
 
-        # Should include Boost in compilation?
+        # Should include Vcpkg in compilation?
         self._should_use = False
 
         # Compiler options read from json file:

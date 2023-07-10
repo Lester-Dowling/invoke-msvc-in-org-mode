@@ -1,0 +1,28 @@
+# -*- coding: utf-8 -*-
+#+TITLE: Examples of Using Armadillo from Vcpkg
+#+AUTHOR: L. James Dowling
+
+#+NAME: id-tbl
+#+BEGIN_SRC emacs-lisp :var tbl=""
+(mapcar (lambda (row) (mapcar (lambda (cell) cell) row)) tbl)
+#+end_src
+
+** Verify Armadillo version
+#+header: :libs     -lvcpkg
+#+header: :includes <iostream> <string> <armadillo>
+#+header: :colnames yes :post id-tbl[:colnames yes](*this*)
+#+begin_src C++ :exports results   :results  value table
+using namespace std;
+using namespace arma;
+std::ios::sync_with_stdio(true);
+const char tab = '\t';
+const char newline = '\n';
+
+cout << "Armadillo Version" << tab << endl;
+cout << arma_version::as_string() << tab << endl;
+#+end_src
+
+#+RESULTS:
+| Armadillo Version           |
+|-----------------------------|
+| 12.0.1 (Cortisol Profusion) |
