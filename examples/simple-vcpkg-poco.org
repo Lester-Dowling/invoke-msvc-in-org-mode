@@ -2,6 +2,11 @@
 #+TITLE: Examples of Using POCO from Vcpkg
 #+AUTHOR: L. James Dowling
 
+#+NAME: round-tbl
+#+BEGIN_SRC emacs-lisp :var tbl=""
+(mapcar (lambda (row) (mapcar (lambda (cell) cell) row)) tbl)
+#+end_src
+
 ** Verify POCO version
 #+header: :exports  results   :results  scalar
 #+header: :libs     -lvcpkg_Poco
@@ -147,3 +152,56 @@ if (Environment::has("HOME"))
   cout
 	<< "Home:       " << Environment::get("HOME") << endl;
 #+end_src
+
+
+* Parse Numbers in an Org Mode Table
+
+Copied from [[https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-C.html]]
+
+#+name: somedata
+| nb    | sqr | noise |
+|-------+-----+-------|
+| zero  |   0 |  0.23 |
+| one   |   1 |  1.31 |
+| two   |   4 |  4.61 |
+| three |   9 |  9.05 |
+| four  |  16 | 16.55 |
+
+#+header: :var      somedata=somedata
+#+header: :libs     -lvcpkg_Poco
+#+header: :includes <cstdio> <iostream>  <Poco/NumberParser.h>
+#+header: :colnames yes :post round-tbl[:colnames yes](*this*)
+#+begin_src C++ :exports results   :results  value
+using namespace std;
+using Poco::NumberParser;
+std::ios::sync_with_stdio(true);
+cin.tie(NULL);
+const char tab = '\t';
+const char newline = '\n';
+
+cout << somedata_header[0] << tab;
+cout << somedata_header[1] << tab;
+cout << somedata_header[1] << " * 1000" << tab;
+cout << somedata_header[2] << tab;
+cout << somedata_header[2] << " * 1000" << newline;
+
+for (int row=0; row < somedata_rows; ++row) {
+  cout << row << tab;
+  for (int col=1; col < somedata_cols; ++col) {
+	const char *const cell_data = somedata[row][col];
+	const double num = NumberParser::parseFloat(cell_data);
+	printf("%g", num); cout << tab;
+	printf("%g", 1000 * num); cout << tab;
+  }
+  cout << newline;
+ }
+#+end_src
+
+#+RESULTS:
+| nb | sqr | sqr * 1000 | noise | noise * 1000 |
+|----+-----+------------+-------+--------------|
+|  0 |   0 |          0 |  0.23 |          230 |
+|  1 |   1 |       1000 |  1.31 |         1310 |
+|  2 |   4 |       4000 |  4.61 |         4610 |
+|  3 |   9 |       9000 |  9.05 |         9050 |
+|  4 |  16 |      16000 | 16.55 |        16550 |
