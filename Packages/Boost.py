@@ -26,9 +26,6 @@ class Boost(IPackage):
         # Make a copy of argv:
         self._argv = argv[:]
 
-        # List of Paths to Boost release lib files:
-        self._release_libs = list()
-
         # List of DLLs which were not copied:
         self._uncopied_dlls = set()
 

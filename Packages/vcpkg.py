@@ -34,9 +34,6 @@ class Vcpkg(IPackage):
         # Make a copy of argv:
         self._argv = argv[:]
 
-        # List of Paths to Vcpkg release lib files:
-        self._release_libs = list()
-
         # List of DLLs which were not copied:
         self._uncopied_dlls = set()
 
@@ -74,13 +71,15 @@ class Vcpkg(IPackage):
         self._release_libs = list()
         lib_paths = list(self.lib_dir.glob('*.lib')) # All libs in the lib dir.
         for requested_lib in requested_libs:
-            self._release_libs = [str(n) for n in lib_paths if n.stem.startswith(requested_lib)]
+            found_libs = [str(n) for n in lib_paths if n.stem.startswith(requested_lib)]
+            self._release_libs.extend(found_libs)
 
         # Find the Vcpkg debug lib files:
         self._debug_libs = list()
         lib_paths = list(self.debug_lib_dir.glob('*.lib')) # All libs in the debug lib dir.
         for requested_lib in requested_libs:
-            self._debug_libs = [str(n) for n in lib_paths if n.stem.startswith(requested_lib)]
+            found_libs = [str(n) for n in lib_paths if n.stem.startswith(requested_lib)]
+            self._debug_libs.extend(found_libs)
 
     @property
     @overrides
