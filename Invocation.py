@@ -96,6 +96,7 @@ class Invocation:
 
         SRC = Path(self.src_path).resolve()  # The temp C++ file produced by Org mode.
         TARGET = Path(self.target).resolve() # The target executable.
+        org_cwd = Path.cwd()                 # The working directory of the org file.
         os.chdir(str(SRC.parent))            # Set cwd to the location of SRC.
         CWD = Path.cwd()                     # The cwd which should now be parent of SRC.
         OBJ = CWD / (SRC.stem + ".obj")      # Obj file to be deleted later.
@@ -122,6 +123,7 @@ class Invocation:
             for d in self._vcpkg.defines:
                 cl_clo.append("/D" + d)
 
+        cl_clo.append("/I" + str(org_cwd)) # Include files from the current org directory.
         for d in self._common.include_dirs:
             cl_clo.append("/I" + str(Path(d)))
 

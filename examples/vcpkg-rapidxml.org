@@ -1,0 +1,33 @@
+# -*- coding: utf-8 -*-
+#+TITLE: Examples of Using RapidXML from Vcpkg
+#+AUTHOR: L. James Dowling
+
+#+NAME: id-tbl
+#+BEGIN_SRC emacs-lisp :var tbl=""
+(mapcar (lambda (row) (mapcar (lambda (cell) cell) row)) tbl)
+#+end_src
+
+#+NAME: round-tbl
+#+BEGIN_SRC emacs-lisp :var tbl="" fmt="%.4f"
+(mapcar (lambda (row) (mapcar (lambda (cell) (if (numberp cell) (format fmt cell) cell)) row)) tbl)
+#+end_src
+
+
+** Verify RapidXML Version
+#+header: :libs     -lvcpkg
+#+header: :includes <iostream> rapidxml_ext.h
+#+begin_src C++ :exports results   :results  value
+using namespace std;
+using namespace rapidxml;
+
+xml_document<> doc;
+const char *const node_text = doc.allocate_string("Google");
+const char *const a_node = doc.allocate_string("a");
+xml_node<> *node = doc.allocate_node(node_element, a_node, node_text);
+doc.append_node(node);
+const char *const href_attr = doc.allocate_string("href");
+const char *const href_value = doc.allocate_string("google.com");
+xml_attribute<> *attr = doc.allocate_attribute(href_attr, href_value);
+node->append_attribute(attr);
+cout << doc;
+#+end_src
