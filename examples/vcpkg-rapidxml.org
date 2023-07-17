@@ -13,7 +13,7 @@
 #+end_src
 
 
-** Verify RapidXML Version
+** Create XML Document
 #+header: :libs     -lvcpkg
 #+header: :includes <iostream> rapidxml_ext.h
 #+begin_src C++ :exports results   :results  value
@@ -31,3 +31,38 @@ xml_attribute<> *attr = doc.allocate_attribute(href_attr, href_value);
 node->append_attribute(attr);
 cout << doc;
 #+end_src
+
+
+** Read XML Document
+
+#+name: tove
+#+BEGIN_EXAMPLE
+<note> \
+<to>Tove</to> \
+<from>Jani</from> \
+<heading>Reminder</heading> \
+<body>Don't forget me this weekend!</body> \
+</note> \
+#+END_EXAMPLE
+
+#+header: :var      tove=tove
+#+header: :libs     -lvcpkg
+#+header: :includes <iostream> rapidxml_ext.h
+#+begin_src C++ :exports results   :results  output
+using namespace std;
+using namespace rapidxml;
+
+xml_document<> doc;
+char *const text = doc.allocate_string(tove);
+doc.parse<0>(text);    // 0 means default parse flags
+cout << doc;
+#+end_src
+
+#+RESULTS:
+: <note>
+: 	<to>Tove</to>
+: 	<from>Jani</from>
+: 	<heading>Reminder</heading>
+: 	<body>Don&apos;t forget me this weekend!</body>
+: </note>
+: 
