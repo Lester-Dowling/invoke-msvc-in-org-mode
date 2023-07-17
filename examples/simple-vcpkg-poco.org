@@ -4,7 +4,7 @@
 
 #+NAME: round-tbl
 #+BEGIN_SRC emacs-lisp :var tbl=""
-(mapcar (lambda (row) (mapcar (lambda (cell) cell) row)) tbl)
+  (mapcar (lambda (row) (mapcar (lambda (cell) cell) row)) tbl)
 #+end_src
 
 ** Verify POCO version
@@ -12,8 +12,8 @@
 #+header: :libs     -lvcpkg_Poco
 #+header: :includes <iostream> <Poco/Version.h>
 #+begin_src C++
-using namespace std;
-cout << "POCO version is " << POCO_VERSION << endl;
+  using namespace std;
+  cout << "POCO version is " << POCO_VERSION << endl;
 #+end_src
 
 
@@ -22,13 +22,13 @@ cout << "POCO version is " << POCO_VERSION << endl;
 #+header: :libs     -lvcpkg_Poco
 #+header: :includes <iostream> <Poco/Foundation.h> <cmath>
 #+begin_src C++
-using namespace std;
-Poco::Int8 a = pow(2,4);
-Poco::UInt8 b = pow(2,5);
-Poco::Int64 c = pow(2,16);
-cout << "a = " << int(a) << endl;
-cout << "b = " << int(b) << endl;
-cout << "c = " << c << endl;
+  using namespace std;
+  Poco::Int8 a = pow(2,4);
+  Poco::UInt8 b = pow(2,5);
+  Poco::Int64 c = pow(2,16);
+  cout << "a = " << int(a) << endl;
+  cout << "b = " << int(b) << endl;
+  cout << "c = " << c << endl;
 #+end_src
 
 
@@ -37,19 +37,19 @@ cout << "c = " << c << endl;
 #+header: :libs     -lvcpkg_Poco
 #+header: :includes <iostream> <Poco/Exception.h>
 #+begin_src C++
-using namespace std;
-auto throwing_function = [](){
-  throw Poco::RuntimeException{"This is a runtime exception from Poco."};
- };
+  using namespace std;
+  auto throwing_function = [](){
+      throw Poco::RuntimeException{"This is a runtime exception from Poco."};
+   };
 
-try {
-  throwing_function();
-  cout << "No throw!" << endl;
- }
- catch (Poco::Exception const& e) {
-   cout << e.name() << ':' << endl;
-   cout << e.message() << endl;
- }
+  try {
+      throwing_function();
+      cout << "No throw!" << endl;
+   }
+   catch (Poco::Exception const& e) {
+       cout << e.name() << ':' << endl;
+       cout << e.message() << endl;
+   }
 #+end_src
 
 
@@ -58,25 +58,25 @@ try {
 #+header: :libs     -lvcpkg_Poco
 #+header: :includes <iostream> <Poco/Exception.h>
 #+begin_src C++
-using namespace std;
-auto throwing_function = [](){
-  throw Poco::RuntimeException{"This is a runtime exception from Poco."};
- };
+  using namespace std;
+  auto throwing_function = [](){
+      throw Poco::RuntimeException{"This is a runtime exception from Poco."};
+   };
 
-Poco::Exception *pe{};
-cout << "pe == " << pe << endl;
-try {
-  throwing_function();
-  cout << "No throw!" << endl;
- }
- catch (Poco::Exception const& e) {
-   pe = e.clone();
- }
-cout << "pe == " << pe << endl;
-if (pe) {
-  cout << pe->name() << ':' << endl;
-  cout << pe->message() << endl;
- }
+  Poco::Exception *pe{};
+  cout << "pe == " << pe << endl;
+  try {
+      throwing_function();
+      cout << "No throw!" << endl;
+   }
+   catch (Poco::Exception const& e) {
+       pe = e.clone();
+   }
+  cout << "pe == " << pe << endl;
+  if (pe) {
+      cout << pe->name() << ':' << endl;
+      cout << pe->message() << endl;
+   }
 #+end_src
 
 
@@ -85,26 +85,26 @@ if (pe) {
 #+header: :libs     -lvcpkg_Poco
 #+header: :includes <iostream> <vector> <Poco/String.h>
 #+begin_src C++
-using namespace std;
-// trim
-const std::string ss = "     a  std  string     ";
-const std::string ww = Poco::trim(ss);
-cout << '|' << ww << '|' << endl;
-// case conversion
-const std::string uu = Poco::toUpper(ww);
-cout << '|' << uu << '|' << endl;
-const int cc = Poco::icompare(ww,uu);
-cout << cc << endl;
-// translate chars
-const std::string ee = "Eiffel Tower";
-const std::string tt = Poco::translate(ee, "Eelo", "3310");
-cout << ee << endl;
-cout << tt << endl;
-// concatenation
-vector<string> colours = {"red", "green", "blue"};
-const std::string sep = ", ";
-const std::string rr = Poco::cat(sep, colours.begin(), colours.end());
-cout << "Colours == " << rr << endl;
+  using namespace std;
+  // trim
+  const std::string ss = "     a  std  string     ";
+  const std::string ww = Poco::trim(ss);
+  cout << '|' << ww << '|' << endl;
+  // case conversion
+  const std::string uu = Poco::toUpper(ww);
+  cout << '|' << uu << '|' << endl;
+  const int cc = Poco::icompare(ww,uu);
+  cout << cc << endl;
+  // translate chars
+  const std::string ee = "Eiffel Tower";
+  const std::string tt = Poco::translate(ee, "Eelo", "3310");
+  cout << ee << endl;
+  cout << tt << endl;
+  // concatenation
+  vector<string> colours = {"red", "green", "blue"};
+  const std::string sep = ", ";
+  const std::string rr = Poco::cat(sep, colours.begin(), colours.end());
+  cout << "Colours == " << rr << endl;
 #+end_src
 
 
@@ -113,23 +113,23 @@ cout << "Colours == " << rr << endl;
 #+header: :libs     -lvcpkg_Poco
 #+header: :includes <iostream>  <Poco/Foundation.h>  <Poco/ByteOrder.h>
 #+begin_src C++
-using namespace std;
-#if POCO_OS == POCO_OS_WINDOWS_NT
-cout << "This is Windows!" << endl;
-#elif POCO_OS == POCO_OS_LINUX
-cout << "This is Linux!" << endl;
-#endif
+  using namespace std;
+  #if POCO_OS == POCO_OS_WINDOWS_NT
+  cout << "This is Windows!" << endl;
+  #elif POCO_OS == POCO_OS_LINUX
+  cout << "This is Linux!" << endl;
+  #endif
 
-#ifdef POCO_ARCH_LITTLE_ENDIAN
-cout << "This arch is little endian." << endl;
-#else
-cout << "This arch is BIG endian." << endl;
-#endif
+  #ifdef POCO_ARCH_LITTLE_ENDIAN
+  cout << "This arch is little endian." << endl;
+  #else
+  cout << "This arch is BIG endian." << endl;
+  #endif
 
-const Poco::UInt16 port = 80;
-const Poco::UInt16 networkPort = Poco::ByteOrder::toNetwork(port);
-cout << "Port         == " << int(port) << endl;
-cout << "Network Port == " << int(networkPort) << endl;
+  const Poco::UInt16 port = 80;
+  const Poco::UInt16 networkPort = Poco::ByteOrder::toNetwork(port);
+  cout << "Port         == " << int(port) << endl;
+  cout << "Network Port == " << int(networkPort) << endl;
 #+end_src
 
 
@@ -138,19 +138,19 @@ cout << "Network Port == " << int(networkPort) << endl;
 #+header: :libs     -lvcpkg_Poco
 #+header: :includes <iostream>  <Poco/Environment.h>
 #+begin_src C++
-using namespace std;
-using Poco::Environment;
+  using namespace std;
+  using Poco::Environment;
 
-cout
-<< "OS Name:    " << Environment::osName() << endl
-<< "OS Version: " << Environment::osVersion() << endl
-<< "OS Arch:    " << Environment::osArchitecture() << endl
-<< "Node Name:  " << Environment::nodeName() << endl
-<< "Node ID:    " << Environment::nodeId() << endl;
-
-if (Environment::has("HOME"))
   cout
-	<< "Home:       " << Environment::get("HOME") << endl;
+  << "OS Name:    " << Environment::osName() << endl
+  << "OS Version: " << Environment::osVersion() << endl
+  << "OS Arch:    " << Environment::osArchitecture() << endl
+  << "Node Name:  " << Environment::nodeName() << endl
+  << "Node ID:    " << Environment::nodeId() << endl;
+
+  if (Environment::has("HOME"))
+      cout
+          << "Home:       " << Environment::get("HOME") << endl;
 #+end_src
 
 
@@ -172,36 +172,27 @@ Copied from [[https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-C.html
 #+header: :includes <cstdio> <iostream>  <Poco/NumberParser.h>
 #+header: :colnames yes :post round-tbl[:colnames yes](*this*)
 #+begin_src C++ :exports results   :results  value
-using namespace std;
-using Poco::NumberParser;
-std::ios::sync_with_stdio(true);
-cin.tie(NULL);
-const char tab = '\t';
-const char newline = '\n';
+  using namespace std;
+  using Poco::NumberParser;
+  std::ios::sync_with_stdio(true);
+  cin.tie(NULL);
+  const char tab = '\t';
+  const char newline = '\n';
 
-cout << somedata_header[0] << tab;
-cout << somedata_header[1] << tab;
-cout << somedata_header[1] << " * 1000" << tab;
-cout << somedata_header[2] << tab;
-cout << somedata_header[2] << " * 1000" << newline;
+  cout << somedata_header[0] << tab;
+  cout << somedata_header[1] << tab;
+  cout << somedata_header[1] << " * 1000" << tab;
+  cout << somedata_header[2] << tab;
+  cout << somedata_header[2] << " * 1000" << newline;
 
-for (int row=0; row < somedata_rows; ++row) {
-  cout << row << tab;
-  for (int col=1; col < somedata_cols; ++col) {
-	const char *const cell_data = somedata[row][col];
-	const double num = NumberParser::parseFloat(cell_data);
-	printf("%g", num); cout << tab;
-	printf("%g", 1000 * num); cout << tab;
-  }
-  cout << newline;
- }
+  for (int row=0; row < somedata_rows; ++row) {
+      cout << row << tab;
+      for (int col=1; col < somedata_cols; ++col) {
+          const char *const cell_data = somedata[row][col];
+          const double num = NumberParser::parseFloat(cell_data);
+          printf("%g", num); cout << tab;
+          printf("%g", 1000 * num); cout << tab;
+      }
+      cout << newline;
+   }
 #+end_src
-
-#+RESULTS:
-| nb | sqr | sqr * 1000 | noise | noise * 1000 |
-|----+-----+------------+-------+--------------|
-|  0 |   0 |          0 |  0.23 |          230 |
-|  1 |   1 |       1000 |  1.31 |         1310 |
-|  2 |   4 |       4000 |  4.61 |         4610 |
-|  3 |   9 |       9000 |  9.05 |         9050 |
-|  4 |  16 |      16000 | 16.55 |        16550 |

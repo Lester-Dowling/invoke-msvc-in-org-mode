@@ -1,5 +1,6 @@
 {
 	"list": [
+        "ADVAPI32.dll",
 		"CONCRT140.dll",
 		"KERNEL32.dll",
         "MSVCP140.dll",
