@@ -187,16 +187,13 @@ void fig_1_10(const std::vector<ImagePtr>& image_vector) {
 	  }
 	}};
 
-  function_node<ImagePtr, ImagePtr> gamma{g,
-	unlimited,
+  function_node<ImagePtr, ImagePtr> gamma{g, unlimited,
 	[] (ImagePtr img) -> ImagePtr { return applyGamma(img, 1.4); } };
 
-  function_node<ImagePtr, ImagePtr> tint{g,
-	unlimited,
+  function_node<ImagePtr, ImagePtr> tint{g, unlimited,
 	[tint_array] (ImagePtr img) -> ImagePtr { return applyTint(img, tint_array); } };
 
-  function_node<ImagePtr> write{g,
-	tbb::flow::unlimited,
+  function_node<ImagePtr> write{g, unlimited,
 	[] (ImagePtr img) { writeImage(img); } };
 
   make_edge(src, gamma);
@@ -262,7 +259,6 @@ void writeImage(ImagePtr image_ptr) {
 
 int main(int argc, char* argv[]) {
   std::vector<ImagePtr> image_vector;
-
   for ( int i = 2000; i < 20000000; i *= 10 )
     image_vector.push_back(ch01::makeFractalImage(i));
 
@@ -270,7 +266,8 @@ int main(int argc, char* argv[]) {
   using oneapi::tbb::parallel_for;
   using oneapi::tbb::info::default_concurrency;
   parallel_for(0, default_concurrency(),
-			   [](int) { tbb::tick_count t0 = tbb::tick_count::now();
+			   [](int) {
+				 tbb::tick_count t0 = tbb::tick_count::now();
 				 while ((tbb::tick_count::now() - t0).seconds() < 0.01);
 			   });
 
