@@ -5,7 +5,7 @@ from pathlib import Path
 from Packages.Common import Common
 from Packages.Boost import Boost
 from Packages.Vcpkg import Vcpkg
-
+from Packages.OneAPI_TBB import TBB
 
 def bounded_incr(idx, bound):
     """
@@ -32,7 +32,8 @@ class Invocation:
         self._common = Common(argv)
         self._boost = Boost(self._common.argv)
         self._vcpkg = Vcpkg(self._boost.argv)
-        self._argv = self._vcpkg.argv
+        self._tbb = TBB(self._vcpkg.argv)
+        self._argv = self._tbb.argv
 
         # Arg: output target filename prefixed with "-o"
         idx = 0
@@ -123,6 +124,10 @@ class Invocation:
             for d in self._vcpkg.defines:
                 cl_clo.append("/D" + d)
 
+        if self._tbb.should_use:
+            for d in self._tbb.defines:
+                cl_clo.append("/D" + d)
+
         cl_clo.append("/I" + str(org_cwd)) # Include files from the current org directory.
         for d in self._common.include_dirs:
             cl_clo.append("/I" + str(Path(d)))
@@ -133,6 +138,10 @@ class Invocation:
 
         if self._vcpkg.should_use:
             for d in self._vcpkg.include_dirs:
+                cl_clo.append("/I" + str(Path(d)))
+
+        if self._tbb.should_use:
+            for d in self._tbb.include_dirs:
                 cl_clo.append("/I" + str(Path(d)))
 
         cl_clo.append(str(SRC))
@@ -152,6 +161,10 @@ class Invocation:
             for d in self._vcpkg.release_libs:
                 cl_clo.append(str(d))
 
+        if self._tbb.should_use:
+            for d in self._tbb.release_libs:
+                cl_clo.append(str(d))
+
         logging.debug("cl_clo == {}".format(cl_clo))
         # Invoking the compiler with just subprocess.run seems to work well:
         cp = subprocess.run(cl_clo, capture_output=True, text=True)
@@ -162,3 +175,4 @@ class Invocation:
             raise Exception("Compilation failed: \n{}".format(cp.stdout))
         self._boost.duplicate_required_dlls(self.target)
         self._vcpkg.duplicate_required_dlls(self.target)
+        self._tbb.duplicate_required_dlls(self.target)

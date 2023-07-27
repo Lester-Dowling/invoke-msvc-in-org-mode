@@ -1,0 +1,501 @@
+# -*- coding: utf-8 -*-
+#+TITLE: Examples of Using TBB from oneAPI
+#+AUTHOR: L. James Dowling
+
+#+NAME: id-tbl
+#+BEGIN_SRC emacs-lisp :var tbl=""
+(mapcar (lambda (row) (mapcar (lambda (cell) cell) row)) tbl)
+#+end_src
+
+#+NAME: round-tbl
+#+BEGIN_SRC emacs-lisp :var tbl="" fmt="%.4f"
+(mapcar (lambda (row) (mapcar (lambda (cell) (if (numberp cell) (format fmt cell) cell)) row)) tbl)
+#+end_src
+
+
+** Hello TBB
+#+header: :libs     -loneapi_tbb
+#+header: :includes <iostream> <string> <tbb/tbb.h>
+#+begin_src C++ :exports results   :results  scalar
+using namespace std;
+std::ios::sync_with_stdio(true);
+
+tbb::parallel_invoke(
+					 []() { cout << " Hello " << endl; },
+					 []() { cout << " TBB! " << endl; }
+					 );
+#+end_src
+
+#+RESULTS:
+
+
+** TBB Version
+#+header: :libs     -lvcpkg_tbb
+#+header: :includes <iostream> <string> <tbb/tbb.h>
+#+begin_src C++ :exports results   :results  value table
+using namespace std;
+std::ios::sync_with_stdio(true);
+const char tab = '\t', newline = '\n';
+
+cout << "Runtime Version" << tab;
+cout << "Interface Version" << newline;
+cout << TBB_runtime_version() << tab;
+cout << TBB_runtime_interface_version() << newline;
+#+end_src
+
+#+RESULTS:
+| Runtime Version | Interface Version |
+|          2021.9 |             12090 |
+
+
+
+
+** Hello oneAPI TBB
+#+header: :libs     -lvcpkg_tbb
+#+header: :includes <iostream> <string> <oneapi/tbb.h>
+#+begin_src C++ :exports results   :results  scalar
+using namespace std;
+std::ios::sync_with_stdio(true);
+
+vector<string> v = { " Hello ", " oneAPI ", " TBB! " };
+tbb::parallel_invoke(
+					 [&]() { cout << v[0] << endl; },
+					 [&]() { cout << v[1] << endl; },
+					 [&]() { cout << v[2] << endl; }
+					 );
+#+end_src
+
+
+** Figure 1.7
+#+header: :libs     -lvcpkg_tbb
+#+header: :includes <iostream> <cmath> <oneapi/tbb.h> ch01.hpp
+#+header: :main no
+#+begin_src C++ :exports results   :results  scalar
+using ImagePtr = std::shared_ptr<ch01::Image>;
+
+ImagePtr applyGamma(ImagePtr image_ptr, double gamma);
+ImagePtr applyTint(ImagePtr image_ptr, const double *tints);
+void writeImage(ImagePtr image_ptr);
+
+void fig_1_7(const std::vector<ImagePtr>& image_vector) {
+  const double tint_array[] = {0.75, 0, 0};
+  for (ImagePtr img : image_vector) {
+    img = applyGamma(img, 1.4);
+    img = applyTint(img, tint_array);
+    writeImage(img);
+  }
+}
+
+ImagePtr applyGamma(ImagePtr image_ptr, double gamma) {
+  auto output_image_ptr =
+    std::make_shared<ch01::Image>(image_ptr->name() + "_gamma",
+								  ch01::IMAGE_WIDTH, ch01::IMAGE_HEIGHT);
+  auto in_rows = image_ptr->rows();
+  auto out_rows = output_image_ptr->rows();
+  const int height = in_rows.size();
+  const int width = in_rows[1] - in_rows[0];
+
+  for ( int i = 0; i < height; ++i ) {
+    for ( int j = 0; j < width; ++j ) {
+      const ch01::Image::Pixel& p = in_rows[i][j];
+      double v = 0.3*p.bgra[2] + 0.59*p.bgra[1] + 0.11*p.bgra[0];
+      double res = pow(v, gamma);
+      if(res > ch01::MAX_BGR_VALUE) res = ch01::MAX_BGR_VALUE;
+      out_rows[i][j] = ch01::Image::Pixel(res, res, res);
+    }
+  }
+  return output_image_ptr;
+}
+
+ImagePtr applyTint(ImagePtr image_ptr, const double *tints) {
+  auto output_image_ptr =
+    std::make_shared<ch01::Image>(image_ptr->name() + "_tinted",
+								  ch01::IMAGE_WIDTH, ch01::IMAGE_HEIGHT);
+  auto in_rows = image_ptr->rows();
+  auto out_rows = output_image_ptr->rows();
+  int height = in_rows.size();
+  const int width = in_rows[1] - in_rows[0];
+
+  for ( int i = 0; i < height; ++i ) {
+    for ( int j = 0; j < width; ++j ) {
+      const ch01::Image::Pixel& p = in_rows[i][j];
+      std::uint8_t b = (double)p.bgra[0] +
+		(ch01::MAX_BGR_VALUE-p.bgra[0])*tints[0];
+      std::uint8_t g = (double)p.bgra[1] +
+		(ch01::MAX_BGR_VALUE-p.bgra[1])*tints[1];
+      std::uint8_t r = (double)p.bgra[2] +
+		(ch01::MAX_BGR_VALUE-p.bgra[2])*tints[2];
+      out_rows[i][j] =
+        ch01::Image::Pixel(
+						   (b > ch01::MAX_BGR_VALUE) ? ch01::MAX_BGR_VALUE : b,
+						   (g > ch01::MAX_BGR_VALUE) ? ch01::MAX_BGR_VALUE : g,
+						   (r > ch01::MAX_BGR_VALUE) ? ch01::MAX_BGR_VALUE : r
+						   );
+    }
+  }
+  return output_image_ptr;
+}
+
+void writeImage(ImagePtr image_ptr) {
+  image_ptr->write( (image_ptr->name() + ".bmp").c_str());
+}
+
+int main(int argc, char* argv[]) {
+  std::vector<ImagePtr> image_vector;
+
+  for ( int i = 2000; i < 20000000; i *= 10 )
+    image_vector.push_back(ch01::makeFractalImage(i));
+
+  tbb::tick_count t0 = tbb::tick_count::now();
+  fig_1_7(image_vector);
+  std::cout << "Time : " << (tbb::tick_count::now()-t0).seconds()
+            << " seconds" << std::endl;
+}
+#+end_src
+
+#+RESULTS:
+: Time : 0.0871669 seconds
+
+
+
+
+** Figure 1.10
+#+header: :libs     -lvcpkg_tbb
+#+header: :includes <iostream> <cmath> <oneapi/tbb.h> ch01.hpp
+#+header: :main no
+#+begin_src C++ :exports results   :results  scalar
+using ImagePtr = std::shared_ptr<ch01::Image>;
+
+ImagePtr applyGamma(ImagePtr image_ptr, double gamma);
+ImagePtr applyTint(ImagePtr image_ptr, const double *tints);
+void writeImage(ImagePtr image_ptr);
+
+void fig_1_10(const std::vector<ImagePtr>& image_vector) {
+  const double tint_array[] = {0.75, 0, 0};
+  using oneapi::tbb::flow::graph;
+  using oneapi::tbb::flow::function_node;
+  using oneapi::tbb::flow::input_node;
+  using oneapi::tbb::flow::unlimited;
+
+  graph g;
+  int i = 0;
+  input_node<ImagePtr> src{g,
+	[&i, &image_vector] (oneapi::tbb::flow_control& fc) -> ImagePtr {
+	  if ( i < image_vector.size() )
+		return image_vector[i++];
+	  else {
+		fc.stop();
+		return ImagePtr{};
+	  }
+	}};
+
+  function_node<ImagePtr, ImagePtr> gamma{g, unlimited,
+	[] (ImagePtr img) -> ImagePtr { return applyGamma(img, 1.4); } };
+
+  function_node<ImagePtr, ImagePtr> tint{g, unlimited,
+	[tint_array] (ImagePtr img) -> ImagePtr { return applyTint(img, tint_array); } };
+
+  function_node<ImagePtr> write{g, unlimited,
+	[] (ImagePtr img) { writeImage(img); } };
+
+  make_edge(src, gamma);
+  make_edge(gamma, tint);
+  make_edge(tint, write);
+  src.activate();
+  g.wait_for_all();
+}
+
+ImagePtr applyGamma(ImagePtr image_ptr, double gamma) {
+  auto output_image_ptr =
+    std::make_shared<ch01::Image>(image_ptr->name() + "_gamma",
+								  ch01::IMAGE_WIDTH, ch01::IMAGE_HEIGHT);
+  auto in_rows = image_ptr->rows();
+  auto out_rows = output_image_ptr->rows();
+  const int height = in_rows.size();
+  const int width = in_rows[1] - in_rows[0];
+
+  for ( int i = 0; i < height; ++i ) {
+    for ( int j = 0; j < width; ++j ) {
+      const ch01::Image::Pixel& p = in_rows[i][j];
+      double v = 0.3*p.bgra[2] + 0.59*p.bgra[1] + 0.11*p.bgra[0];
+      double res = pow(v, gamma);
+      if(res > ch01::MAX_BGR_VALUE) res = ch01::MAX_BGR_VALUE;
+      out_rows[i][j] = ch01::Image::Pixel(res, res, res);
+    }
+  }
+  return output_image_ptr;
+}
+
+ImagePtr applyTint(ImagePtr image_ptr, const double *tints) {
+  auto output_image_ptr =
+    std::make_shared<ch01::Image>(image_ptr->name() + "_tinted",
+								  ch01::IMAGE_WIDTH, ch01::IMAGE_HEIGHT);
+  auto in_rows = image_ptr->rows();
+  auto out_rows = output_image_ptr->rows();
+  int height = in_rows.size();
+  const int width = in_rows[1] - in_rows[0];
+
+  for ( int i = 0; i < height; ++i ) {
+    for ( int j = 0; j < width; ++j ) {
+      const ch01::Image::Pixel& p = in_rows[i][j];
+      std::uint8_t b = (double)p.bgra[0] +
+		(ch01::MAX_BGR_VALUE-p.bgra[0])*tints[0];
+      std::uint8_t g = (double)p.bgra[1] +
+		(ch01::MAX_BGR_VALUE-p.bgra[1])*tints[1];
+      std::uint8_t r = (double)p.bgra[2] +
+		(ch01::MAX_BGR_VALUE-p.bgra[2])*tints[2];
+      out_rows[i][j] =
+        ch01::Image::Pixel(
+						   (b > ch01::MAX_BGR_VALUE) ? ch01::MAX_BGR_VALUE : b,
+						   (g > ch01::MAX_BGR_VALUE) ? ch01::MAX_BGR_VALUE : g,
+						   (r > ch01::MAX_BGR_VALUE) ? ch01::MAX_BGR_VALUE : r
+						   );
+    }
+  }
+  return output_image_ptr;
+}
+
+void writeImage(ImagePtr image_ptr) {
+  image_ptr->write( (image_ptr->name() + ".bmp").c_str());
+}
+
+int main(int argc, char* argv[]) {
+  std::vector<ImagePtr> image_vector;
+  for ( int i = 2000; i < 20000000; i *= 10 )
+    image_vector.push_back(ch01::makeFractalImage(i));
+
+  // warmup the scheduler
+  using oneapi::tbb::parallel_for;
+  using oneapi::tbb::info::default_concurrency;
+  parallel_for(0, default_concurrency(),
+			   [](int) {
+				 tbb::tick_count t0 = tbb::tick_count::now();
+				 while ((tbb::tick_count::now() - t0).seconds() < 0.01);
+			   });
+
+  tbb::tick_count t0 = tbb::tick_count::now();
+  fig_1_10(image_vector);
+  std::cout << "Time : " << (tbb::tick_count::now() - t0).seconds()
+            << " seconds" << std::endl;
+}
+#+end_src
+
+#+RESULTS:
+: Time : 0.024537 seconds
+
+
+
+
+
+
+** Message Flow Graph Example
+
+Copied from [[https://spec.oneapi.io/versions/1.1-rev-1/elements/oneTBB/source/flow_graph/message_flow_graph_example.html][Message Flow Graph Example]]
+
+#+header: :libs     -lvcpkg_tbb
+#+header: :includes <iostream> <cmath> <oneapi/tbb.h>
+#+header: :main no
+#+begin_src C++ :exports results   :results  scalar
+
+struct square {
+  int operator()(int v) { return v*v; }
+};
+
+struct cube {
+  int operator()(int v) { return v*v*v; }
+};
+
+class sum {
+  int &my_sum;
+public:
+  sum( int &s ) : my_sum(s) {}
+  int operator()( std::tuple<int, int> v ) {
+	my_sum += get<0>(v) + get<1>(v);
+	return my_sum;
+  }
+};
+
+int main() {
+  using namespace oneapi::tbb::flow;
+
+  graph g;
+  broadcast_node<int> input{g};
+  function_node<int,int> squarer{ g, unlimited, square() };
+  function_node<int,int> cuber{ g, unlimited, cube() };
+  join_node<std::tuple<int,int>, queueing> join{ g };
+  int result = 0;
+  function_node<std::tuple<int,int>,int> summer{ g, serial, sum(result) };
+
+  make_edge( input, squarer );
+  make_edge( input, cuber );
+  make_edge( squarer, get<0>( join.input_ports() ) );
+  make_edge( cuber, get<1>( join.input_ports() ) );
+  make_edge( join, summer );
+
+  for (int i = 1; i <= 10; ++i)
+	input.try_put(i);
+  g.wait_for_all();
+
+  std::cout << "Final result is " << result << std::endl;
+}
+#+end_src
+
+
+
+** Message Flow Graph Example with an Input Node
+
+Copied from [[https://www.intel.com/content/www/us/en/docs/onetbb/developer-guide-api-reference/2021-10/data-flow-graph.html#GUID-72B93EFA-6358-4F61-A638-C1CF838E5A92][Data Flow Graph]]
+
+#+header: :libs     -lvcpkg_tbb
+#+header: :includes <iostream> <cmath> <oneapi/tbb.h>
+#+header: :main no
+#+begin_src C++ :exports results   :results  scalar
+class src_body {
+  const int my_limit;
+  int my_next_value;
+public:
+  src_body(int l) : my_limit{l}, my_next_value{1} {}
+
+  int operator()( oneapi::tbb::flow_control& fc ) {
+	if ( my_next_value <= my_limit )
+	  return my_next_value++;
+	else {
+	  fc.stop();
+	  return int();
+	}
+  }
+};
+
+
+int main() {
+  // using namespace oneapi::tbb::flow;
+  using oneapi::tbb::flow::graph;
+  using oneapi::tbb::flow::function_node;
+  using oneapi::tbb::flow::input_node;
+  using oneapi::tbb::flow::unlimited;
+  int result = 0;
+  graph g;
+  function_node< int, int > squarer{ g, unlimited, [](const int &v) { return v*v; } };
+  function_node< int, int > cuber{ g, unlimited, [](const int &v) { return v*v*v; } };
+  function_node< int, int > summer{ g, 1, [&](const int &v ) -> int { return result += v; } };
+  make_edge( squarer, summer );
+  make_edge( cuber, summer );
+  input_node< int > src{ g, src_body{10} };
+  make_edge( src, squarer );
+  make_edge( src, cuber );
+  src.activate();
+  g.wait_for_all();
+  std::cout << "Final result is " << result << std::endl;
+}
+
+#+end_src
+
+#+RESULTS:
+: Final result is 3410
+
+
+
+
+** Dependency Flow Graph Example
+
+Copied from [[https://spec.oneapi.io/versions/1.1-rev-1/elements/oneTBB/source/flow_graph/dependency_flow_graph_example.html][Dependency Flow Graph Example]]
+
+#+header: :libs     -lvcpkg_tbb
+#+header: :includes <iostream> <cmath> <oneapi/tbb.h>
+#+header: :main no
+#+begin_src C++ :exports results   :results  scalar
+struct body {
+  std::string my_name;
+  body(const char *name) : my_name(name) {}
+  void operator()(oneapi::tbb::flow::continue_msg) const {
+	printf("%s\n", my_name.c_str());
+  }
+};
+
+int main() {
+  // using namespace oneapi::tbb::flow;
+  using oneapi::tbb::flow::graph;
+  using oneapi::tbb::flow::broadcast_node;
+  using oneapi::tbb::flow::continue_node;
+  using oneapi::tbb::flow::continue_msg;
+
+  graph g;
+  broadcast_node< continue_msg > start(g);
+  continue_node<continue_msg> a(g, body("A"));
+  continue_node<continue_msg> b(g, body("B"));
+  continue_node<continue_msg> c(g, body("C"));
+  continue_node<continue_msg> d(g, body("D"));
+  continue_node<continue_msg> e(g, body("E"));
+
+  make_edge(start, a);
+  make_edge(start, b);
+  make_edge(a, c);
+  make_edge(b, c);
+  make_edge(c, d);
+  make_edge(a, e);
+
+  for (int i = 0; i < 3; ++i) {
+	start.try_put(continue_msg{});
+	g.wait_for_all();
+  }
+}
+#+end_src
+
+
+
+** Dependency Flow Graph Example
+
+Copied from [[https://spec.oneapi.io/versions/latest/elements/oneTBB/source/algorithms/functions/parallel_reduce_func.html][parallel_reduce]]
+
+#+header: :libs     -lvcpkg_tbb   -lboost_random
+#+header: :includes <iostream> <cmath> <vector> <iterator> <algorithm> <functional> <oneapi/tbb.h> <boost/random/random_device.hpp> <boost/random/uniform_real_distribution.hpp>
+#+header: :main no
+#+begin_src C++ :exports results   :results  scalar
+
+template<typename Real>
+Real ParallelSum( Real array[], size_t n ) {
+  using oneapi::tbb::parallel_reduce;
+  using oneapi::tbb::blocked_range;
+
+  return parallel_reduce( blocked_range<Real*>{ array, array+n },
+						  Real{},
+						  [](const blocked_range<Real*>& r, Real init)->Real {
+							for( Real* a=r.begin(); a!=r.end(); ++a )
+							  init += *a;
+							return init;
+						  },
+						  []( Real x, Real y )->Real {
+							return x+y;
+						  } );
+}
+
+template<typename Real>
+std::vector<Real> random_reals(const int N) {
+  static boost::random::random_device rd;
+  const Real minmax = N;
+  boost::random::uniform_real_distribution<Real> real_dist{-minmax, minmax};
+  std::vector<Real> result; result.reserve(N);
+  std::generate_n(std::back_inserter(result), N, [&]() -> Real { return real_dist(rd); });
+  return result;
+}
+
+void print_vector(std::vector<float> const& vfloats, std::string const& name) {
+  using namespace std;
+  cout << name << " == ";
+  copy(vfloats.begin(), vfloats.end(), ostream_iterator<float>{cout, "   "});
+  cout << endl;
+}
+
+int main() {
+  using namespace std;
+  const int N = 50000;
+  vector<float> vfloats = random_reals<float>(N);
+  cout << "Parallel float sum == " << ParallelSum(&vfloats.front(), vfloats.size()) << endl;
+  vector<double> vdoubles = random_reals<double>(N);
+  cout << "Parallel double sum == " << ParallelSum(&vdoubles.front(), vdoubles.size()) << endl;
+}
+#+end_src
+
+#+RESULTS:
+: Parallel float sum == 1.9217e+06
+: Parallel double sum == -8.90378e+06

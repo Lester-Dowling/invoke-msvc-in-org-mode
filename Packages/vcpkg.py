@@ -53,7 +53,7 @@ class Vcpkg(IPackage):
         requested_libs = list()  # List of Vcpkg libs found in argv.
         re_arg = re.compile(self._arg_regex_str)
         re_arg_include = re.compile(self._arg_include_regex_str)
-        unused_argv = list()  # argv without Vcpkg options.
+        remainder_argv = list()  # argv without Vcpkg options.
         for arg in self._argv:
             m = re_arg_include.match(arg)
             if m:
@@ -64,8 +64,8 @@ class Vcpkg(IPackage):
                     self._should_use = True
                     requested_libs.append(m.group(1))
                 else:
-                    unused_argv.append(arg)
-        self._argv = unused_argv  # Keep the args not used in this package.
+                    remainder_argv.append(arg)
+        self._argv = remainder_argv  # Keep the args not used in this package.
 
         # Find the Vcpkg release lib files:
         self._release_libs = list()
