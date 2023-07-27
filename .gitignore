@@ -132,4 +132,6 @@ dmypy.json
 .pyre/
 
 # Generated image file formats
-.bmp
+*.bmp
+*.png
+*.jpg

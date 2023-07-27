@@ -15,7 +15,7 @@
 
 ** Hello TBB
 #+header: :libs     -loneapi_tbb
-#+header: :includes <iostream> <string> <tbb/tbb.h>
+#+header: :includes <iostream> <string> <oneapi/tbb.h>
 #+begin_src C++ :exports results   :results  scalar
 using namespace std;
 std::ios::sync_with_stdio(true);
@@ -27,11 +27,13 @@ tbb::parallel_invoke(
 #+end_src
 
 #+RESULTS:
+: TBB!
+: Hello
 
 
 ** TBB Version
-#+header: :libs     -lvcpkg_tbb
-#+header: :includes <iostream> <string> <tbb/tbb.h>
+#+header: :libs     -loneapi_tbb
+#+header: :includes <iostream> <string> <oneapi/tbb.h>
 #+begin_src C++ :exports results   :results  value table
 using namespace std;
 std::ios::sync_with_stdio(true);
@@ -45,14 +47,14 @@ cout << TBB_runtime_interface_version() << newline;
 
 #+RESULTS:
 | Runtime Version | Interface Version |
-|          2021.9 |             12090 |
+|          2021.7 |             12070 |
 
 
 
 
 ** Hello oneAPI TBB
-#+header: :libs     -lvcpkg_tbb
-#+header: :includes <iostream> <string> <oneapi/tbb.h>
+#+header: :libs     -loneapi_tbb
+#+header: :includes <iostream> <string>  <oneapi/tbb.h>
 #+begin_src C++ :exports results   :results  scalar
 using namespace std;
 std::ios::sync_with_stdio(true);
@@ -65,9 +67,14 @@ tbb::parallel_invoke(
 					 );
 #+end_src
 
+#+RESULTS:
+: TBB!
+: oneAPI
+: Hello
+
 
 ** Figure 1.7
-#+header: :libs     -lvcpkg_tbb
+#+header: :libs     -loneapi_tbb
 #+header: :includes <iostream> <cmath> <oneapi/tbb.h> ch01.hpp
 #+header: :main no
 #+begin_src C++ :exports results   :results  scalar
@@ -154,13 +161,13 @@ int main(int argc, char* argv[]) {
 #+end_src
 
 #+RESULTS:
-: Time : 0.0871669 seconds
+: Time : 0.0825938 seconds
 
 
 
 
 ** Figure 1.10
-#+header: :libs     -lvcpkg_tbb
+#+header: :libs     -loneapi_tbb
 #+header: :includes <iostream> <cmath> <oneapi/tbb.h> ch01.hpp
 #+header: :main no
 #+begin_src C++ :exports results   :results  scalar
@@ -281,7 +288,7 @@ int main(int argc, char* argv[]) {
 #+end_src
 
 #+RESULTS:
-: Time : 0.024537 seconds
+: Time : 0.0237683 seconds
 
 
 
@@ -292,7 +299,7 @@ int main(int argc, char* argv[]) {
 
 Copied from [[https://spec.oneapi.io/versions/1.1-rev-1/elements/oneTBB/source/flow_graph/message_flow_graph_example.html][Message Flow Graph Example]]
 
-#+header: :libs     -lvcpkg_tbb
+#+header: :libs     -loneapi_tbb
 #+header: :includes <iostream> <cmath> <oneapi/tbb.h>
 #+header: :main no
 #+begin_src C++ :exports results   :results  scalar
@@ -340,13 +347,16 @@ int main() {
 }
 #+end_src
 
+#+RESULTS:
+: Final result is 3410
+
 
 
 ** Message Flow Graph Example with an Input Node
 
 Copied from [[https://www.intel.com/content/www/us/en/docs/onetbb/developer-guide-api-reference/2021-10/data-flow-graph.html#GUID-72B93EFA-6358-4F61-A638-C1CF838E5A92][Data Flow Graph]]
 
-#+header: :libs     -lvcpkg_tbb
+#+header: :libs     -loneapi_tbb
 #+header: :includes <iostream> <cmath> <oneapi/tbb.h>
 #+header: :main no
 #+begin_src C++ :exports results   :results  scalar
@@ -400,7 +410,7 @@ int main() {
 
 Copied from [[https://spec.oneapi.io/versions/1.1-rev-1/elements/oneTBB/source/flow_graph/dependency_flow_graph_example.html][Dependency Flow Graph Example]]
 
-#+header: :libs     -lvcpkg_tbb
+#+header: :libs     -loneapi_tbb
 #+header: :includes <iostream> <cmath> <oneapi/tbb.h>
 #+header: :main no
 #+begin_src C++ :exports results   :results  scalar
@@ -441,13 +451,32 @@ int main() {
 }
 #+end_src
 
+#+RESULTS:
+#+begin_example
+B
+A
+E
+C
+D
+A
+E
+B
+C
+D
+A
+E
+B
+C
+D
+#+end_example
+
 
 
 ** Dependency Flow Graph Example
 
 Copied from [[https://spec.oneapi.io/versions/latest/elements/oneTBB/source/algorithms/functions/parallel_reduce_func.html][parallel_reduce]]
 
-#+header: :libs     -lvcpkg_tbb   -lboost_random
+#+header: :libs     -loneapi_tbb   -lboost_random
 #+header: :includes <iostream> <cmath> <vector> <iterator> <algorithm> <functional> <oneapi/tbb.h> <boost/random/random_device.hpp> <boost/random/uniform_real_distribution.hpp>
 #+header: :main no
 #+begin_src C++ :exports results   :results  scalar
@@ -497,5 +526,5 @@ int main() {
 #+end_src
 
 #+RESULTS:
-: Parallel float sum == 1.9217e+06
-: Parallel double sum == -8.90378e+06
+: Parallel float sum == -1.34461e+07
+: Parallel double sum == 4.44897e+06
