@@ -2,35 +2,25 @@ import os
 import re
 import json
 import logging
-import subprocess
-from dotenv import load_dotenv
 from overrides import overrides
 from Packages.IPackage import IPackage
 from pathlib import Path
+import OneAPI_env
 
 
 class TBB(IPackage):
     """
     Compiler and linker command line options for TBB under oneAPI.
-    Depends on the ONEAPI_ROOT environment variable.
+    Depends on the TBB_ROOT environment variable.
     """
 
     def __init__(self, argv : list[str] = []):
+        OneAPI_env.setup_env()
         self._root = Path(os.environ['TBB_ROOT'])
         if not self._root.exists():
-            raise Exception(f"No oneAPI root: {self._root}")
+            raise Exception(f"No oneAPI TBB root: {self._root}")
 
-        # OneAPI installed dir:
-        self._installed_dir = self._root / "installed" / "x64-windows"
-        if not self._installed_dir.exists():
-            raise Exception(f"No oneAPI installed dir: {self._installed_dir}")
-
-        # OneAPI debug dir:
-        self._debug_dir = self._installed_dir / "debug"
-        if not self._debug_dir.exists():
-            raise Exception(f"No oneAPI debug dir: {self._debug_dir}")
-
-        # OneAPI lib filenames:
+        # TBB lib flag:
         self._arg_regex_str = "-loneapi_tbb"
 
         # Make a copy of argv:
@@ -39,43 +29,43 @@ class TBB(IPackage):
         # List of DLLs which were not copied:
         self._uncopied_dlls = set()
 
-        # Should include OneAPI in compilation?
+        # Should use TBB in compilation?
         self._should_use = False
 
         # Compiler options read from json file:
         self._defines = list()
-        script_filename = Path(os.path.realpath(__file__))
-        user_options_filename = script_filename.with_name( 'OneAPI_TBB.json')
+        this_script_filename = Path(os.path.realpath(__file__))
+        user_options_filename = this_script_filename.with_name( 'OneAPI_TBB.json')
         if user_options_filename.exists():
             with open(user_options_filename) as f:
                 user_clo = json.load(f)
             self._defines = user_clo['defines']
 
-        # Find the requested OneAPI libs in argv:
-        requested_libs = list()  # List of OneAPI libs found in argv.
+        # Find the TBB lib flag in argv:
+        requested_libs = list()  # List of TBB libs found in argv.
         re_arg = re.compile(self._arg_regex_str)
-        unused_argv = list()  # argv without OneAPI options.
+        remainder_argv = list()  # argv without TBB options.
         for arg in self._argv:
             m = re_arg.match(arg)
             if m:
                 self._should_use = True
-                requested_libs.append(m.group(1))
+                requested_libs.append("tbb")
             else:
-                unused_argv.append(arg)
-        self._argv = unused_argv  # Keep the args not used in this package.
+                remainder_argv.append(arg)
+        self._argv = remainder_argv  # Keep the args not used in this package.
 
-        # Find the OneAPI release lib files:
+        # Find the TBB release lib files:
         self._release_libs = list()
-        lib_paths = list(self.lib_dir.glob('*.lib')) # All libs in the lib dir.
+        lib_glob = list(self.lib_dir.glob('*.lib')) # All libs in the lib dir.
         for requested_lib in requested_libs:
-            found_libs = [str(n) for n in lib_paths if n.stem.startswith(requested_lib)]
+            found_libs = [str(n) for n in lib_glob if n.stem.startswith(requested_lib)]
             self._release_libs.extend(found_libs)
 
-        # Find the OneAPI debug lib files:
+        # Find the TBB debug lib files:
         self._debug_libs = list()
-        lib_paths = list(self.debug_lib_dir.glob('*.lib')) # All libs in the debug lib dir.
+        lib_glob = list(self.debug_lib_dir.glob('*_debug.lib')) # All debug libs in the lib dir.
         for requested_lib in requested_libs:
-            found_libs = [str(n) for n in lib_paths if n.stem.startswith(requested_lib)]
+            found_libs = [str(n) for n in lib_glob if n.stem.startswith(requested_lib)]
             self._debug_libs.extend(found_libs)
 
     @property
@@ -101,9 +91,9 @@ class TBB(IPackage):
     @property
     @overrides
     def include_dirs(self) -> list[str]:
-        d = self._installed_dir / "include"
+        d = self._root / "include"
         if not d.exists():
-            raise Exception(f"No oneAPI include dir: {d}")
+            raise Exception(f"No TBB include dir: {d}")
         return [str(d)]
 
     @property
@@ -123,32 +113,26 @@ class TBB(IPackage):
     @property
     @overrides
     def lib_dir(self) -> Path:
-        d = self._installed_dir / "lib"
+        d = self._root / "lib" / "intel64" / "vc14"
         if not d.exists():
-            raise Exception(f"No oneAPI lib dir: {d}")
+            raise Exception(f"No TBB lib dir: {d}")
         return d
 
     @property
     def debug_lib_dir(self) -> Path:
-        d = self._debug_dir / "lib"
-        if not d.exists():
-            raise Exception(f"No oneAPI debug lib dir: {d}")
-        return d
+        return self.lib_dir
 
     @property
     @overrides
     def dll_dir(self) -> Path:
-        d = self._installed_dir / "bin"
+        d = self._root / "redist" / "intel64" / "vc14"
         if not d.exists():
-            raise Exception(f"No oneAPI dll dir: {d}")
+            raise Exception(f"No TBB dll dir: {d}")
         return d
 
     @property
     def debug_dll_dir(self) -> Path:
-        d = self._debug_dir / "bin"
-        if not d.exists():
-            raise Exception(f"No oneAPI debug dll dir: {d}")
-        return d
+        return self.dll_dir
 
     @property
     @overrides
