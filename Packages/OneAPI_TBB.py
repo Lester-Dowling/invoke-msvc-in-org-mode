@@ -5,7 +5,7 @@ import logging
 from overrides import overrides
 from Packages.IPackage import IPackage
 from pathlib import Path
-import OneAPI_env
+import OneAPI_TBB_env
 
 
 class TBB(IPackage):

@@ -8,23 +8,23 @@ from pathlib import Path
 def _create_env(env_path):
     """
     Create the environment variables to suit Intel's oneAPI.
-    Depends on the ONEAPI_ROOT environment variable.
+    Depends on the TBB_ROOT environment variable.
     """
-    ONEAPI_ROOT = Path(os.environ['ONEAPI_ROOT'])
-    if not ONEAPI_ROOT.exists():
-        raise Exception("No such directory: oneAPI Root")
+    TBB_ROOT = Path(os.environ['TBB_ROOT'])
+    if not TBB_ROOT.exists():
+        raise Exception("No such directory: TBB Root")
 
     with open(env_path, 'w') as fenv:
-        SETVARS = ONEAPI_ROOT / "setvars.bat"
-        if not SETVARS.exists():
-            raise Exception("No such file: setvars.bat")
-        os.environ['SETVARS'] = str(SETVARS)
-        fenv.write(f"SETVARS={os.environ['SETVARS']}\n")
+        TBBVARS = TBB_ROOT / "env" /  "vars.bat"
+        if not TBBVARS.exists():
+            raise Exception("No such file: env/vars.bat")
+        os.environ['TBBVARS'] = str(TBBVARS)
+        fenv.write(f"TBBVARS={os.environ['TBBVARS']}\n")
         p = subprocess.run([
             "cmd.exe",
             "/c",
             "CALL",
-            str(SETVARS),
+            str(TBBVARS),
             "intel64",
             "vs2022",
             ">nul",
@@ -34,7 +34,7 @@ def _create_env(env_path):
         ], capture_output=True)
         if p.returncode != 0:
             raise Exception('cmd failed: ' + str(p))
-        m = os.getenv("PATH").split(';')
+        m = str(os.getenv("PATH")).split(';')
         z = list()
         e = p.stdout.replace(b'\r\n', b'\n').decode('latin1')
 
@@ -57,11 +57,11 @@ def _create_env(env_path):
 
 def setup_env():
     """
-    Setup the environment variables for Intel's oneAPI.  Either: (1) read the
+    Setup the environment variables for Intel's TBB.  Either: (1) read the
     environment variable values from the cache file ~/.env, or (2) create anew the
-    environment variables, then cache them in ~/.env.
+    environment variables, then cache them in env_path.
     """
-    env_path = Path.home() / '.env-oneapi'
+    env_path = Path.home() / '.env-oneapi-tbb'
     if env_path.exists():
         p = os.environ['PATH']
         load_dotenv(env_path)
